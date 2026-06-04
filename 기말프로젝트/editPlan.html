@@ -205,10 +205,12 @@
         const tripId = urlParams.get('id') || 'trip2';
         const day = urlParams.get('day') || '1';
 
-        // 👤 로그인한 유저의 고유 코드 분석 및 계정 격리형 일정 키 조립
+        // 👤 로그인한 유저 분석
         const loggedInUser = localStorage.getItem('loggedInUser');
         const userCode = loggedInUser ? JSON.parse(loggedInUser).code : 'guest';
-        const dayKey = `confirmed_${tripId}_${day}`; // ✨ 계정 격리 키 반영
+        
+        // ⭐ [싱크 일치] 다른 공유 페이지들과 100% 일치하는 통합 키 고정!
+        const dayKey = `confirmed_${tripId}_${day}`; 
 
         let draggedIndex = null; 
 
@@ -234,7 +236,6 @@
             renderList();
         });
 
-        // 📜 renderList, editPlanName, deletePlan 함수는 기존 dayKey를 그대로 사용하므로 코드 동일 (유지)
         function renderList() {
             const scheduleContainer = document.querySelector('.schedule-container');
             scheduleContainer.innerHTML = ''; 

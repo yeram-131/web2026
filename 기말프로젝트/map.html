@@ -148,10 +148,12 @@
             const tripId = urlParams.get('id') || 'trip2';
             const day = urlParams.get('day') || '1';
 
-            // 👤 로그인한 유저의 고유 코드 분석 및 계정 격리 키 생성
+            // 👤 로그인한 유저의 고유 코드 분석
             const loggedInUser = localStorage.getItem('loggedInUser');
             const userCode = loggedInUser ? JSON.parse(loggedInUser).code : 'guest';
-            const dayKey = `confirmed_${tripId}_${day}`; // ✨ 계정 격리 키 반영
+            
+            // ⭐ [싱크 일치] 통합 확정 일정 키 매핑
+            const dayKey = `confirmed_${tripId}_${day}`; 
 
             // 2. 헤더 메타데이터 연동 (내 계정 전용 방에서)
             const tripsKey = `trips_${userCode}`;
@@ -198,7 +200,6 @@
             initKakaoMap(confirmedList);
         });
 
-        // initKakaoMap, initBlankMap 함수는 로직 동일 (유지)
         function initKakaoMap(list) {
             const mapContainer = document.getElementById('map');
             const mapOption = { center: new kakao.maps.LatLng(33.450701, 126.570667), level: 3 };

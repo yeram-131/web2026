@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="common.css">
     <title>홈</title>
     <style>
-        
         /* 전체 페이지 레이아웃 - 플렉스박스 사용 */
         body {
             display: flex;
@@ -46,17 +45,16 @@
         /* 실제 회색 콘텐츠 박스 */
         .content-box {
             background-color: #f5f5f5; /* 회색 박스 */
-            height: 300px; /* 박스 높이 (원하는 대로 조절해) */
+            height: 300px; 
             width: 100%;
             border-radius: 15px;
         }
-
     </style>
 </head>
 <body>
 
     <header>
-        <img src="나들이_로고.png" alt="나들이 로고" class="logo">
+        <img src="나들이_로고.png" alt="나들이 로고" class="logo" onclick="location.href='home.html'">
         <div class="menu-container">
             <div class="hamburger">☰</div>
             <ul class="dropdown">
@@ -69,10 +67,9 @@
     </header>
 
     <main>
-        <!-- ✨ 로그인한 유저 이름이 동적으로 들어갈 공간 추가! -->
-    <div id="welcome-msg" style="font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; color: #202857;">
-        로딩 중...
-    </div>
+        <div id="welcome-msg" style="font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; color: #202857;">
+            로딩 중...
+        </div>
 
         <div class="content-section">
             <div class="section-label" onclick="location.href='myTrip.html'">내 여행</div>
@@ -100,32 +97,54 @@
                 document.getElementById('welcome-msg').innerText = `${user.name}님, 어떤 나들이를 떠나볼까요?`;
 
                 const userCode = user.code;
-                const trips = JSON.parse(localStorage.getItem(`trips_${userCode}`)) || [];
-                const friends = JSON.parse(localStorage.getItem(`friends_${userCode}`)) || [];
+                const tripsKey = `trips_${userCode}`;
+                const friendsKey = `friends_${userCode}`;
+
+                // 📌 순수 데이터 읽기 (더미데이터 초기화 코드는 싹 걷어내고 login.html로 완벽 분리!)
+                const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
+                const friends = JSON.parse(localStorage.getItem(friendsKey)) || [];
 
                 const contentBoxes = document.querySelectorAll('.content-box');
                 const tripBox = contentBoxes[0];
                 const friendBox = contentBoxes[1];
 
-                // ✈️ 1. 내 여행 목록 출력 (연회색 박스를 꽉 채우도록 최대 6개로 확장)
+                // ✈️ 1. 내 여행 목록 출력 (최대 6개 + 깜빡임 없는 단정한 알림 글자 적용)
                 if (trips.length === 0) {
                     tripBox.innerHTML = `<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#757575; font-size:0.95rem;">등록된 여행이 없습니다</div>`;
                 } else {
-                    // 내부 레이아웃 설정: 스크롤이 생겨도 박스 밖으로 탈출하지 않게 제한
                     tripBox.style.padding = '20px';
                     tripBox.style.display = 'flex';
                     tripBox.style.flexDirection = 'column';
                     tripBox.style.overflowY = 'auto'; 
                     
-                    // 최대 6개까지만 보여주기 (.slice(0, 6))
-                    let tripHtml = trips.slice(0, 6).map(t => `
-                        <div onclick="location.href='tripDetail.html?id=${t.id}'" style="background:white; padding:12px 20px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:between; font-weight:bold; cursor:pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); flex-shrink: 0;">
-                            <span style="color:#202857;">✈️ ${t.name}</span>
-                            <span style="margin-left:auto; font-size:0.85rem; color:#666; font-weight:normal;">${t.date}</span>
-                        </div>
-                    `).join('');
+                    let tripHtml = trips.slice(0, 6).map(t => {
+                        // [알림 알고리즘] 총 일차 중 친구가 제안한 pending 상태의 일정이 존재하는지 검사
+                        let hasNewSuggestion = false;
+                        for (let d = 1; d <= t.totalDays; d++) {
+                            const suggestedKey = `suggested_${t.id}_${d}`;
+                            const suggestedList = JSON.parse(localStorage.getItem(suggestedKey)) || [];
+                            
+                            // 내가 보낸 게 아닌(proposerCode !== userCode) 대기 일정 탐색
+                            const friendProposalExist = suggestedList.some(item => item.proposerCode !== userCode);
+                            if (friendProposalExist) {
+                                hasNewSuggestion = true;
+                                break;
+                            }
+                        }
+
+                        // 요구사항 반영: 깜빡임 애니메이션 없이 단정하고 직관적인 텍스트 라벨 적용
+                        const badgeHtml = hasNewSuggestion 
+                            ? `<span style="background-color:#ff4d4d; color:white; font-size:0.75rem; padding:3px 8px; border-radius:10px; margin-left:8px; font-weight:bold; vertical-align:middle;">새 제안 🔴</span>` 
+                            : '';
+
+                        return `
+                            <div onclick="location.href='tripDetail.html?id=${t.id}'" style="background:white; padding:12px 20px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:between; font-weight:bold; cursor:pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); flex-shrink: 0; align-items:center;">
+                                <span style="color:#202857;">✈️ ${t.name} ${badgeHtml}</span>
+                                <span style="margin-left:auto; font-size:0.85rem; color:#666; font-weight:normal;">${t.date}</span>
+                            </div>
+                        `;
+                    }).join('');
                     
-                    // [더보기] 버튼 (스크롤을 내려도 항상 목록 맨 아래에 부드럽게 붙어있음)
                     tripHtml += `
                         <div onclick="location.href='myTrip.html'" style="margin-top: 10px; text-align:right; font-size:0.9rem; color:#666; font-weight:bold; cursor:pointer; text-decoration:underline; text-underline-offset:3px; padding-right:5px; padding-bottom:5px; flex-shrink: 0;">
                             내 여행 더보기 +
@@ -134,7 +153,7 @@
                     tripBox.innerHTML = tripHtml;
                 }
 
-                // 👥 2. 내 친구 목록 출력 (연회색 박스를 꽉 채우도록 최대 6명으로 확장)
+                // 👥 2. 내 친구 목록 출력 (최대 6명)
                 if (friends.length === 0) {
                     friendBox.innerHTML = `<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#757575; font-size:0.95rem;">등록된 친구가 없습니다</div>`;
                 } else {
@@ -143,7 +162,6 @@
                     friendBox.style.flexDirection = 'column';
                     friendBox.style.overflowY = 'auto';
                     
-                    // 최대 6명까지만 보여주기 (.slice(0, 6))
                     let friendHtml = friends.slice(0, 6).map(f => `
                         <div style="background:white; padding:12px 20px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:between; align-items:center; font-weight:bold; flex-shrink: 0;">
                             <span style="color:#000;">👤 ${f.name}</span>
@@ -151,7 +169,6 @@
                         </div>
                     `).join('');
                     
-                    // [더보기] 버튼
                     friendHtml += `
                         <div onclick="location.href='myFriend.html'" style="margin-top: 10px; text-align:right; font-size:0.9rem; color:#666; font-weight:bold; cursor:pointer; text-decoration:underline; text-underline-offset:3px; padding-right:5px; padding-bottom:5px; flex-shrink: 0;">
                             내 친구 더보기 +

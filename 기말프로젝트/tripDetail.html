@@ -212,7 +212,7 @@
             // 👤 로그인한 유저의 고유 코드 분석 및 전용 방 키 조립
             const loggedInUser = localStorage.getItem('loggedInUser');
             const userCode = loggedInUser ? JSON.parse(loggedInUser).code : 'guest';
-            const tripsKey = `trips_${userCode}`; // 내 계정 전용 여행방 키
+            const tripsKey = `trips_${userCode}`; 
 
             // 1. 주소창에서 ?id=... 값 읽어오기
             const urlParams = new URLSearchParams(window.location.search);
@@ -230,8 +230,8 @@
             // 3. 하드코딩된 기존 상자 지우고 일차(totalDays)만큼 동적 생성
             const mainContent = document.querySelector('main');
             const headerBlock = document.querySelector('.detail-header');
-            mainContent.innerHTML = ''; // 초기화
-            mainContent.appendChild(headerBlock); // 헤더는 다시 부착
+            mainContent.innerHTML = ''; 
+            mainContent.appendChild(headerBlock); 
 
             for (let d = 1; d <= currentTrip.totalDays; d++) {
                 const scheduleContainer = document.createElement('div');
@@ -247,16 +247,8 @@
                     </div>
                 `;
 
-                // 4. 이 여행의 해당 일차에 맞는 진짜 격리된 일정 데이터만 쏙 골라서 그려주기
-                const dayKey = `confirmed_${tripId}_${d}`; // ✨ 계정 격리 키 반영
-                
-                // 테스트용 초기 더미데이터 세팅 로직 (내 방 전용으로 세팅)
-                if (!localStorage.getItem(dayKey)) {
-                    let defaultPlaces = [];
-                    if (tripId === 'trip2' && d === 1) defaultPlaces = ["아베베 베이커리", "맛있는 고기국수"];
-                    if (tripId === 'trip2' && d === 2) defaultPlaces = ["으아악", "알람좀꺼라"];
-                    localStorage.setItem(dayKey, JSON.stringify(defaultPlaces.map(p => ({ name: p }))));
-                }
+                // 4. ⭐ [버그 수정] 다른 공유 페이지들과 일치하게 userCode가 빠진 통합 키 매핑!
+                const dayKey = `confirmed_${tripId}_${d}`; 
 
                 const confirmedList = JSON.parse(localStorage.getItem(dayKey)) || [];
                 confirmedList.forEach(item => {
