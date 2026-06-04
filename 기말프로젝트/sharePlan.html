@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>일정 추가</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+    <link rel="stylesheet" href="common.css">
+    
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=52c189f6d3ae45119ab513a6d7a4fb85&libraries=services"></script>
+
+    <style>
+        /* ★ 하단바가 화면 중간에 뜨는 버그를 잡기 위해 body 스타일 추가 */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #fff;
+        }
+
+        /* --- 메인 콘텐츠 영역 --- */
+        main {
+            flex: 1;
+            padding: 30px 20px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* 여행 요약 정보 상단 바 */
+        .detail-header {
+            display: flex;
+            align-items: center;
+            padding-bottom: 12px;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+
+        .back-btn {
+            font-size: 1.5rem;
+            cursor: pointer;
+            font-weight: bold;
+            background: none;
+            border: none;
+            padding: 0 5px;
+        }
+
+        .travel-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        /* 날짜, 장소, 동행인 우측 정렬 */
+        .travel-meta {
+            display: flex;
+            gap: 25px;
+            font-size: 0.95rem;
+            margin-left: auto;
+            align-items: center;
+        }
+
+        .travel-date {
+            color: #333;
+        }
+
+        /* 섹션 타이틀 묶음 (설명 글씨 포함) */
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .section-desc {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        /* 큰 섹션 공통 바깥 여백 */
+        .section-group {
+            margin-bottom: 35px;
+        }
+
+        /* --- 1. 일정 추가 박스 --- */
+        .add-schedule-container {
+            background-color: #f5f5f5; /* 연회색 큰 상자 */
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .add-schedule-container .search-btn {
+            background-color: #d9d9d9;
+            border: 1px solid #a6a6a6;
+            padding: 8px 18px;
+            font-size: 0.95rem;
+            color: #333;
+            cursor: pointer;
+            /* 장소 이름이 길어져도 버튼 모양이 깨지지 않게 방어 코드 추가 */
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .add-schedule-container input {
+            background-color: #d9d9d9;
+            border: 1px solid #a6a6a6;
+            padding: 8px 15px;
+            font-size: 0.95rem;
+            text-align: center;
+            width: 100%;
+            max-width: 250px;
+        }
+
+        .add-schedule-container input::placeholder {
+            color: #757575;
+        }
+
+        .add-schedule-container .plus-btn {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            font-weight: 300;
+            cursor: pointer;
+            margin-left: auto; /* 플러스 버튼을 오른쪽 끝으로 밀기 */
+            padding-right: 10px;
+        }
+
+        /* --- 2. 제안된 일정 리스트 --- */
+        .suggested-list {
+            background-color: #f5f5f5;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* 제안된 일정 개별 행 */
+        .suggested-item {
+            background-color: #d9d9d9;
+            border-radius: 20px;
+            padding: 12px 25px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* 내부 정보 그룹 (장소, 제안자 공통) */
+        .info-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .info-group .label {
+            font-size: 0.9rem;
+            color: #757575; /* '장소', '제안자' 라벨은 흐리게 */
+            min-width: 35px;
+        }
+
+        .info-group .value {
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: #000;
+        }
+
+        /* 가로 비율 분할 배치 */
+        .item-place {
+            width: 45%;
+        }
+
+        .item-proposer {
+            width: 35%;
+        }
+
+        /* 우측 액션 버튼 및 상태 텍스트 (오른쪽 정렬) */
+        .item-actions {
+            margin-left: auto; 
+            display: flex;
+            gap: 15px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .action-btn:hover {
+            color: #000;
+        }
+
+        /* 수락 대기 중 텍스트 */
+        .status-text {
+            font-size: 0.9rem;
+            color: #757575;
+        }
+
+        /* ★ [2단계] 지도 검색창 모달 팝업 레이아웃 스타일 추가 */
+        .map-modal {
+            display: none; /* 평소에는 숨김 */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); /* 반투명 어두운 배경 */
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .modal-close {
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #888;
+        }
+        .modal-search-row {
+            display: flex;
+            gap: 8px;
+        }
+        .modal-search-row input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        .modal-search-row button {
+            padding: 10px 15px;
+            background-color: #202857;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #modal-results {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 6px;
+        }
+        .search-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .search-item:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <img src="나들이_로고.png" alt="나들이 로고" class="logo" onclick="location.href='home.html'">
+        <div class="menu-container">
+            <div class="hamburger">☰</div>
+            <ul class="dropdown">
+                <li onclick="location.href='myTrip.html'">내 여행</li>
+                <li onclick="location.href='myFriend.html'">내 친구</li>
+                <li onclick="location.href='myPage.html'">내 정보</li>
+                <li onclick="logout()">로그아웃</li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <div class="detail-header">
+            <button class="back-btn" onclick="history.back()">←</button>
+            <span class="travel-title">여행1 - 2일차</span>
+            
+            <div class="travel-meta">
+                <span class="travel-date">2026.05.23 ~ 2026.05.24</span>
+                <span class="travel-location">제주도</span>
+                <span class="travel-companion">홍길동</span>
+            </div>
+        </div>
+
+        <div class="section-group">
+            <div class="section-header">
+                <h3 class="section-title">일정 추가</h3>
+                <p class="section-desc">추가한 장소는 친구가 수락해야 일정에 반영돼요</p>
+            </div>
+            <div class="add-schedule-container">
+                <button class="search-btn" id="search-btn" onclick="openMapModal()">지도에서 찾기</button>
+                <button class="plus-btn" onclick="addSuggestedSchedule()">+</button>
+            </div>
+        </div>
+
+        <div class="section-group">
+            <div class="section-header">
+                <h3 class="section-title">제안된 일정</h3>
+            </div>
+            <div class="suggested-list" id="suggested-list">
+                </div>
+        </div>
+    </main>
+
+    <footer>
+        <img src="나들이_로고_글자.png" alt="나들이 로고" class="logo">
+        <p class="copyright">© 2026. Yeram All rights reserved.</p>
+    </footer>
+
+    <div class="map-modal" id="map-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>📍 장소 검색</span>
+                <span class="modal-close" onclick="closeMapModal()">✖</span>
+            </div>
+            <div class="modal-search-row">
+                <input type="text" id="modal-keyword" placeholder="장소명을 입력하세요 (예: 숙명여대)" onkeypress="if(event.keyCode==13) triggerSearch()">
+                <button onclick="triggerSearch()">검색</button>
+            </div>
+            <div id="modal-results">
+                <div style="padding: 30px; text-align: center; color: #888; font-size: 0.9rem;">어디로 떠나볼까?</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="common.js"></script>
+    <script>
+        // 1. 전역 변수 설정
+        const urlParams = new URLSearchParams(window.location.search);
+        const tripId = urlParams.get('id') || 'trip2';
+        const day = urlParams.get('day') || '1';
+
+        // 👤 로그인한 유저의 고유 코드 분석 및 계정 통합형 일정 키 생성
+        const loggedInUser = localStorage.getItem('loggedInUser');
+        const userCode = loggedInUser ? JSON.parse(loggedInUser).code : 'guest';
+
+        // 두 유저가 같은 여행 ID와 일차를 공유하므로 userCode를 뺀 통합 키 사용!
+        const suggestedKey = `suggested_${tripId}_${day}`; 
+        const confirmedKey = `confirmed_${tripId}_${day}`; 
+
+        let selectedPlace = null;
+        let currentUser = "서예람";
+        let currentTrip = null; 
+
+        window.addEventListener('DOMContentLoaded', function() {
+            if (loggedInUser) {
+                currentUser = JSON.parse(loggedInUser).name;
+            }
+
+            // 여행 정보 동적 연동 (내 전용 방에서)
+            const tripsKey = `trips_${userCode}`;
+            const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
+            currentTrip = trips.find(t => t.id === tripId) || trips[1];
+            
+            document.querySelector('.travel-title').innerText = `${currentTrip.name} - ${day}일차`;
+            document.querySelector('.travel-date').innerText = currentTrip.date;
+            document.querySelector('.travel-location').innerText = currentTrip.location;
+            document.querySelector('.travel-companion').innerText = currentTrip.companion;
+            
+            // '혼자' 가는 여행이라면 하단의 '제안된 일정' 섹션을 통째로 숨김
+            if (currentTrip.companion === "혼자") {
+                const suggestedListContainer = document.getElementById('suggested-list');
+                if (suggestedListContainer) {
+                    suggestedListContainer.parentElement.style.display = 'none'; 
+                }
+            }
+
+            // 초기 샘플 제안 데이터 세팅 수정 (proposerCode 추가 동기화)
+            if (currentTrip.companion !== "혼자" && !localStorage.getItem(suggestedKey) && tripId === 'trip2' && day === '1') {
+                const sampleData = [
+                    { name: "아베베 베이커리", proposer: "홍길동", proposerCode: "HONG12", status: "pending" }
+                ];
+                localStorage.setItem(suggestedKey, JSON.stringify(sampleData));
+            }
+
+            renderSuggestedList();
+        });
+
+        // 모달 및 장소 검색 기능 유지
+        function openMapModal() {
+            document.getElementById('map-modal').style.display = 'flex';
+            document.getElementById('modal-keyword').value = '';
+            document.getElementById('modal-results').innerHTML = '<div style="padding: 30px; text-align: center; color: #888; font-size: 0.9rem;">궁금한 장소를 검색해 보세요!</div>';
+            document.getElementById('modal-keyword').focus();
+        }
+        function closeMapModal() { document.getElementById('map-modal').style.display = 'none'; }
+
+        function triggerSearch() {
+            const keyword = document.getElementById('modal-keyword').value;
+            if (!keyword.trim()) { alert('검색어를 입력해 주세요'); return; }
+            const ps = new kakao.maps.services.Places(); 
+            ps.keywordSearch(keyword, function(data, status) {
+                const resultsContainer = document.getElementById('modal-results');
+                resultsContainer.innerHTML = '';
+                if (status === kakao.maps.services.Status.OK) {
+                    data.forEach(place => {
+                        const div = document.createElement('div');
+                        div.className = 'search-item';
+                        div.innerHTML = `<strong>${place.place_name}</strong><br><small style="color:#757575">${place.road_address_name || place.address_name}</small>`;
+                        div.onclick = function() {
+                            selectedPlace = { name: place.place_name, lat: place.y, lng: place.x };
+                            document.getElementById('search-btn').innerText = `📍 ${place.place_name}`;
+                            closeMapModal();
+                        };
+                        resultsContainer.appendChild(div);
+                    });
+                } else {
+                    resultsContainer.innerHTML = `<div style="padding: 30px; text-align: center; color: #888; font-size: 0.9rem;">검색 결과가 없습니다</div>`;
+                }
+            });
+        }
+
+        // 📜 제안된 일정 리스트를 화면에 그려주는 함수 (고유 코드 기반 판별 메커니즘 도입)
+        function renderSuggestedList() {
+            if (currentTrip && currentTrip.companion === "혼자") return;
+            const listContainer = document.getElementById('suggested-list');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
+            
+            const tripList = JSON.parse(localStorage.getItem(suggestedKey)) || [];
+            
+            tripList.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'suggested-item';
+                
+                let actionHtml = '';
+                
+                // ⭐ [버그 완전 박멸] 글자가 아닌 고유 유저 유니크 코드로 제안자 체크!
+                if (item.proposerCode === userCode) {
+                    // 내가 보낸 제안이 확실하므로 "수락 대기 중" 표시
+                    actionHtml = `<span class="status-text">수락 대기 중</span>`;
+                } else {
+                    // 상대방이 보낸 제안이 확실하므로 "수락/삭제 버튼" 완벽 활성화!
+                    actionHtml = `
+                        <button class="action-btn" onclick="acceptItem(${index})">✓</button>
+                        <button class="action-btn" onclick="rejectItem(${index})">✖</button>
+                    `;
+                }
+                
+                itemDiv.innerHTML = `
+                    <div class="info-group item-place"><span class="label">장소</span><span class="value">${item.name}</span></div>
+                    <div class="info-group item-proposer"><span class="label">제안자</span><span class="value">${item.proposer}</span></div>
+                    <div class="item-actions">${actionHtml}</div>
+                `;
+                listContainer.appendChild(itemDiv);
+            });
+        }
+
+        // ➕ 일정 제안 추가 함수 (제안할 때 내 코드까지 묶어서 보관)
+        function addSuggestedSchedule() {
+            if (!selectedPlace) { alert('먼저 [지도에서 찾기] 버튼을 눌러 장소를 선택해줘!'); return; }
+            const finalPlaceName = selectedPlace.name;
+            
+            if (currentTrip && currentTrip.companion === "혼자") {
+                const confirmedList = JSON.parse(localStorage.getItem(confirmedKey)) || [];
+                confirmedList.push({ 
+                    name: finalPlaceName, 
+                    proposer: currentUser, 
+                    proposerCode: userCode,
+                    status: 'confirmed', 
+                    lat: selectedPlace.lat, 
+                    lng: selectedPlace.lng 
+                });
+                localStorage.setItem(confirmedKey, JSON.stringify(confirmedList));
+                alert(`'${finalPlaceName}' 일정이 추가되었습니다`);
+            } else {
+                const tripList = JSON.parse(localStorage.getItem(suggestedKey)) || [];
+                tripList.push({ 
+                    name: finalPlaceName, 
+                    proposer: currentUser, 
+                    proposerCode: userCode, // ✨ 제안 유저의 유니크 코드 전송
+                    status: 'pending', 
+                    lat: selectedPlace.lat, 
+                    lng: selectedPlace.lng 
+                });
+                localStorage.setItem(suggestedKey, JSON.stringify(tripList));
+                alert(`친구에게 '${finalPlaceName}' 일정을 제안했습니다!`);
+            }
+            selectedPlace = null;
+            document.getElementById('search-btn').innerText = '지도에서 찾기';
+            renderSuggestedList();
+        }
+
+        function acceptItem(index) {
+            const tripList = JSON.parse(localStorage.getItem(suggestedKey)) || [];
+            const acceptedItem = tripList.splice(index, 1)[0];
+            const confirmedList = JSON.parse(localStorage.getItem(confirmedKey)) || [];
+            acceptedItem.status = 'confirmed';
+            confirmedList.push(acceptedItem);
+            localStorage.setItem(suggestedKey, JSON.stringify(tripList));
+            localStorage.setItem(confirmedKey, JSON.stringify(confirmedList));
+            alert(`${acceptedItem.name} 일정이 추가되었습니다`);
+            renderSuggestedList();
+        }
+
+        function rejectItem(index) {
+            const tripList = JSON.parse(localStorage.getItem(suggestedKey)) || [];
+            const rejectedItem = tripList.splice(index, 1)[0];
+            localStorage.setItem(suggestedKey, JSON.stringify(tripList));
+            alert(`${rejectedItem.name} 일정을 거절했습니다`);
+            renderSuggestedList();
+        }
+    </script>
+</body>
+</html>

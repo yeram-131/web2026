@@ -1,0 +1,110 @@
+/* 기본 리셋 */
+body, h1, h2, h3, p, ul, li, button, input {
+    margin: 0;
+    padding: 0;
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+    box-sizing: border-box;
+    list-style: none; /* 리스트 점 기호 제거 */
+}
+
+a {
+    text-decoration: none; /* 밑줄 없애기 */
+    color: inherit;        /* 파란색 대신 부모 요소의 글자색을 그대로 따라가기 */
+}
+
+[onclick] {
+    cursor: pointer;
+}
+
+
+
+/* 상단 헤더 스타일 */
+header {
+    display: flex;
+    justify-content: space-between; /* 로고와 메뉴를 양 끝으로 배치 */
+    align-items: center;
+    background-color: #202857; /* 회색 배경 */
+    padding: 5px;
+    color: #333;
+}
+
+header .logo {
+    height: 70px; 
+    padding: 5px;
+    width: auto;
+}
+
+/* 중앙 콘텐츠 영역 스타일 */
+.menu-container {
+    position: relative; 
+}
+
+.hamburger {
+    font-size: 2rem;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    margin: 10px;
+    padding-right: 10px;
+}
+
+/* 드롭다운 메뉴 숨김 처리 */
+.dropdown {
+    display: none; /* 기본 상태에서는 안 보임 */
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    width: 120px;
+    z-index: 10;
+}
+
+.dropdown li {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.dropdown li:last-child {
+    border-bottom: none;
+}
+
+.dropdown li:hover {
+    background-color: #f1f1f1;
+}
+
+/* 햄버거 아이콘에 마우스 올리면 드롭다운 메뉴 등장 */
+/* ① PC 환경: 마우스 호버가 가능한 기기에서만 작동 */
+@media (hover: hover) {
+    .menu-container:hover .dropdown {
+        display: block;
+    }
+}
+
+/* ② 모바일 환경 및 클릭 제어용: show 클래스가 붙으면 무조건 보이기 */
+.dropdown.show {
+    display: block !important;
+}
+
+footer {
+    background-color: #202857; /* 회색 배경 */
+    padding: 10px;
+    padding-top: 10px;
+    text-align: center; /* 중앙 정렬 */
+
+}
+
+footer .logo {
+    height: 40px; 
+    padding: 5px;
+    width: auto;
+}
+
+footer .copyright {
+    font-size: 0.7rem;
+    color: #e6e6e6;
+}

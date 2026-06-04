@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 친구</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+    <link rel="stylesheet" href="common.css">
+    
+    <style>
+        /* 전체 페이지 레이아웃 - 플렉스박스 사용 */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* 화면 전체 높이 사용 */
+            background-color: #fff; /* 메인 배경색: 흰색 */
+        }
+        
+        /* --- 메인 콘텐츠 영역 --- */
+        main {
+            flex: 1;
+            padding: 30px 20px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .title {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        /* 섹션 공통 스타일 */
+        .section-group {
+            margin-bottom: 35px;
+        }
+
+        .section-label {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        /* --- 1. 친구 추가 영역 --- */
+        .add-friend-container {
+            background-color: #f5f5f5; /* 연회색 큰 박스 */
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .add-friend-container input {
+            background-color: #d9d9d9; /* 인풋창 회색 배경 */
+            border: 1px solid #a6a6a6;
+            padding: 10px;
+            font-size: 0.95rem;
+            text-align: center; /* 이미지처럼 텍스트 중앙 정렬 */
+            flex: 1; /* 인풋창이 균등하게 늘어나도록 설정 */
+            max-width: 300px;
+        }
+
+        .add-friend-container input::placeholder {
+            color: #757575;
+        }
+
+        /* 플러스(+) 버튼 */
+        .add-btn {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            font-weight: 300;
+            cursor: pointer;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- 2. 내 친구 목록 영역 --- */
+        .friend-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* 개별 친구 행 (둥근 바 형태) */
+        .friend-item {
+            background-color: #d9d9d9;
+            border-radius: 10px;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between; /* 양 끝과 가운데로 균등 분할 */
+            align-items: center;
+        }
+
+        .friend-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            min-width: 80px;
+        }
+
+        .friend-trips {
+            font-size: 1rem;
+            color: #000;
+            text-align: center;
+            flex: 1; /* 가운데 영역을 차지해서 중앙 정렬 느낌을 줌 */
+        }
+
+        /* 수정 / 삭제 링크 */
+        .friend-actions {
+            display: flex;
+            gap: 12px;
+            font-size: 0.9rem;
+            color: #666;
+            min-width: 70px;
+            justify-content: flex-end;
+        }
+
+        .friend-actions a {
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .friend-actions a:hover {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="나들이_로고.png" alt="나들이 로고" class="logo" onclick="location.href='home.html'">
+        <div class="menu-container">
+            <div class="hamburger">☰</div>
+            <ul class="dropdown">
+                <li onclick="location.href='myTrip.html'">내 여행</li>
+                <li onclick="location.href='myFriend.html'">내 친구</li>
+                <li onclick="location.href='myPage.html'">내 정보</li>
+                <li onclick="logout()">로그아웃</li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <h2 class="title">내 친구</h2>
+        
+        <div class="section-group">
+            <label class="section-label">친구 추가</label>
+            <div class="add-friend-container">
+                <input type="text" id="friend-code" placeholder="고유 코드">
+                <button class="add-btn" onclick="addFriendByCode()">+</button>
+            </div>
+        </div>
+
+        <div class="section-group">
+            <label class="section-label">내 친구</label>
+            <div class="friend-list" id="friend-list"></div>
+        </div>
+    </main>
+
+    <footer>
+        <img src="나들이_로고_글자.png" alt="나들이 로고" class="logo">
+        <p class="copyright">© 2026. Yeram All rights reserved.</p>
+    </footer>
+
+    <script src="common.js"></script>
+    <script>
+        // 1. 유저 고유 코드 분석 및 전용 친구 키 생성
+        const loggedInUser = localStorage.getItem('loggedInUser');
+        const userCode = loggedInUser ? JSON.parse(loggedInUser).code : 'guest';
+        const friendsKey = `friends_${userCode}`; // 내 계정 전용 친구방
+
+        window.addEventListener('DOMContentLoaded', function() {
+            // 덮어쓰기 방지: 스토리지에 키 자체가 아예 존재하지 않을 때(null)만 초기 더미데이터 세팅
+            if (localStorage.getItem(friendsKey) === null) {
+                const defaultFriends = [
+                    { name: "홍길동", code: "HONG12", trips: "함께한 여행 1개" },
+                    { name: "김지연", code: "KIM345", trips: "함께한 여행 0개" }
+                ];
+                localStorage.setItem(friendsKey, JSON.stringify(defaultFriends));
+            }
+
+            renderFriends();
+        });
+
+        // 👥 친구 목록을 화면에 동적으로 그려주는 함수
+        function renderFriends() {
+            const listContainer = document.getElementById('friend-list');
+            listContainer.innerHTML = '';
+
+            const friends = JSON.parse(localStorage.getItem(friendsKey)) || [];
+
+            // ✨ 추가: 내가 만든 진짜 여행 목록 불러오기 (개수 계산용)
+            const tripsKey = `trips_${userCode}`;
+            const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
+
+            if (friends.length === 0) {
+                listContainer.innerHTML = `<div style="padding: 30px; text-align: center; color: #888; font-size: 0.95rem;">아직 추가된 친구가 없어 👥</div>`;
+                return;
+            }
+
+            friends.forEach((friend, index) => {
+                // ✨ 추가: 내 여행 목록 중 동행인(companion) 이름이 이 친구 이름과 똑같은 것만 필터링해서 개수 세기
+                const sharedCount = trips.filter(t => t.companion === friend.name).length;
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'friend-item';
+                itemDiv.innerHTML = `
+                    <span class="friend-name">${friend.name}</span>
+                    <span class="friend-trips">함께한 여행 ${sharedCount}개</span>
+                    <div class="friend-actions">
+                        <a href="#" onclick="deleteFriend(${index}); return false;">삭제</a>
+                    </div>
+                `;
+                listContainer.appendChild(itemDiv);
+            });
+        }
+
+        // ➕ 고유 코드로 진짜 유저를 조회해서 내 친구 및 상대방 친구로 동시 등록! (예외 처리 완벽 보완)
+        function addFriendByCode() {
+            const codeInput = document.getElementById('friend-code');
+            const code = codeInput.value.trim();
+
+            if (!code) {
+                alert('친구의 고유 코드를 입력해 주세요');
+                return;
+            }
+
+            if (code === userCode) {
+                alert('나 자신을 친구로 추가할 수는 없습니다');
+                return;
+            }
+
+            const allUsers = JSON.parse(localStorage.getItem('all_users')) || [];
+            const targetUser = allUsers.find(user => user.code === code);
+
+            if (!targetUser) {
+                alert('입력한 고유 코드에 일치하는 사용자가 존재하지 않습니다');
+                return;
+            }
+
+            // 1) 내 친구 목록에 추가
+            const myFriends = JSON.parse(localStorage.getItem(friendsKey)) || [];
+            const isAlreadyFriend = myFriends.some(f => f.code === code);
+
+            if (isAlreadyFriend) {
+                alert('이미 등록된 친구입니다');
+                return;
+            }
+
+            myFriends.push({
+                name: targetUser.name,
+                code: targetUser.code,
+                trips: "함께한 여행 0개"
+            });
+            localStorage.setItem(friendsKey, JSON.stringify(myFriends));
+
+            // 2) ⭐ [방어 코드 핵심 보완] 상대방 친구 목록방에도 나를 안정적으로 주입!
+            const targetFriendsKey = `friends_${targetUser.code}`;
+            
+            // 상대방 방이 비어있으면(null) 깨지지 않게 무조건 빈 배열([])로 초기화해서 받아옴
+            const targetFriends = JSON.parse(localStorage.getItem(targetFriendsKey)) || [];
+            const isAlreadyTargetFriend = targetFriends.some(f => f.code === userCode);
+
+            if (!isAlreadyTargetFriend) {
+                const myInfo = localStorage.getItem('loggedInUser');
+                if (myInfo) {
+                    const myParsed = JSON.parse(myInfo);
+                    
+                    // 상대방 시점의 내 정보 객체 빌드 (이름과 코드를 정확하게 분리해서 저장)
+                    targetFriends.push({
+                        name: myParsed.name, // 내 진짜 이름 (예: "서예람")
+                        code: userCode,      // 내 고유 코드 (예: "G-XXXXXX")
+                        trips: "함께한 여행 0개"
+                    });
+                    
+                    // 상대방 로컬스토리지에 확실하게 덮어쓰기 저장
+                    localStorage.setItem(targetFriendsKey, JSON.stringify(targetFriends));
+                }
+            }
+
+            alert(`${targetUser.name}님과 친구가 되었습니다! (쌍방 연동 완료)`);
+            codeInput.value = '';
+            renderFriends();
+        }
+
+        // ✖ 친구 삭제 함수 (연쇄 여행 동행인 변경 로직 추가)
+        function deleteFriend(index) {
+            const myFriends = JSON.parse(localStorage.getItem(friendsKey)) || [];
+            const targetFriendName = myFriends[index].name; // 삭제할 친구 이름 백업
+
+            if (confirm(`'${targetFriendName}' 친구를 삭제하시겠습니까?\n친구와 함께한 여행이 '혼자'로 변경됩니다`)) {
+                
+                // 1) 내 친구 목록에서 삭제 처리
+                myFriends.splice(index, 1);
+                localStorage.setItem(friendsKey, JSON.stringify(myFriends));
+
+                // 2) ⭐ [연동 핵심] 내 여행 목록방을 열어서 동행인이 이 친구였던 여행을 전부 '혼자'로 교체
+                const tripsKey = `trips_${userCode}`;
+                const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
+                
+                let isChanged = false;
+                trips.forEach(trip => {
+                    if (trip.companion === targetFriendName) {
+                        trip.companion = "혼자";
+                        isChanged = true;
+                    }
+                });
+
+                if (isChanged) {
+                    localStorage.setItem(tripsKey, JSON.stringify(trips));
+                }
+
+                alert(`친구 삭제가 완료되었습니다`);
+                renderFriends(); // 화면 새로고침
+            }
+        }
+    </script>
+</body>
+</html>

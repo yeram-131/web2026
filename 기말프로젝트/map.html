@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지도</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+    <link rel="stylesheet" href="common.css">
+    
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=52c189f6d3ae45119ab513a6d7a4fb85&libraries=services"></script>
+
+    <style>
+        /* 전체 페이지 레이아웃 - 플렉스박스 사용 */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #fff;
+        }
+
+        /* --- 메인 콘텐츠 영역 --- */
+        main {
+            flex: 1;
+            padding: 30px 20px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* 여행 요약 정보 헤더 */
+        .detail-header {
+            display: flex;
+            align-items: center;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .back-btn {
+            font-size: 1.5rem;
+            cursor: pointer;
+            font-weight: bold;
+            background: none;
+            border: none;
+            padding: 0 5px;
+        }
+
+        .travel-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        /* 날짜, 장소, 동행인 우측 정렬 */
+        .travel-meta {
+            display: flex;
+            gap: 25px;
+            font-size: 0.95rem;
+            margin-left: auto;
+            align-items: center;
+        }
+
+        .travel-date {
+            color: #333;
+        }
+
+        /* --- #1 카카오맵 컨테이너 --- */
+        #map {
+            width: 100%;
+            height: 350px;
+            border-radius: 12px;
+            border: 1px solid #ccc;
+            margin-bottom: 25px;
+        }
+
+        /* --- #2 하단 장소 리스트 --- */
+        .place-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .place-item {
+            background-color: #d9d9d9;
+            border-radius: 10px;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .place-num {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .place-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="나들이_로고.png" alt="나들이 로고" class="logo" onclick="location.href='home.html'">
+        <div class="menu-container">
+            <div class="hamburger">☰</div>
+            <ul class="dropdown">
+                <li onclick="location.href='myTrip.html'">내 여행</li>
+                <li onclick="location.href='myFriend.html'">내 친구</li>
+                <li onclick="location.href='myPage.html'">내 정보</li>
+                <li onclick="logout()">로그아웃</li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <div class="detail-header">
+            <button class="back-btn" id="back-btn">←</button>
+            <span class="travel-title">로딩 중...</span>
+            
+            <div class="travel-meta">
+                <span class="travel-date">-</span>
+                <span class="travel-location">-</span>
+                <span class="travel-companion">-</span>
+            </div>
+        </div>
+
+        <div id="map"></div>
+
+        <div class="place-list" id="place-list"></div>
+    </main>
+
+    <footer>
+        <img src="나들이_로고_글자.png" alt="나들이 로고" class="logo">
+        <p class="copyright">© 2026. Yeram All rights reserved.</p>
+    </footer>
+
+    <script src="common.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            // 1. 주소창 파라미터 분석
+            const urlParams = new URLSearchParams(window.location.search);
+            const tripId = urlParams.get('id') || 'trip2';
+            const day = urlParams.get('day') || '1';
+
+            // 👤 로그인한 유저의 고유 코드 분석 및 계정 격리 키 생성
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const userCode = loggedInUser ? JSON.parse(loggedInUser).code : 'guest';
+            const dayKey = `confirmed_${tripId}_${day}`; // ✨ 계정 격리 키 반영
+
+            // 2. 헤더 메타데이터 연동 (내 계정 전용 방에서)
+            const tripsKey = `trips_${userCode}`;
+            const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
+            const currentTrip = trips.find(t => t.id === tripId) || trips[1];
+
+            document.querySelector('.travel-title').innerText = `${currentTrip.name} - ${day}일차`;
+            document.querySelector('.travel-date').innerText = currentTrip.date;
+            document.querySelector('.travel-location').innerText = currentTrip.location;
+            document.querySelector('.travel-companion').innerText = currentTrip.companion;
+
+            document.getElementById('back-btn').setAttribute('onclick', `location.href='tripDetail.html?id=${tripId}'`);
+
+            // 3. 데이터 로드 및 화면 리스트 그리기
+            const placeListContainer = document.getElementById('place-list');
+            placeListContainer.innerHTML = '';
+
+            const confirmedList = JSON.parse(localStorage.getItem(dayKey)) || [];
+
+            if (confirmedList.length === 0) {
+                const mapContainer = document.getElementById('map');
+                mapContainer.style.backgroundColor = '#f5f5f5'; 
+                mapContainer.style.display = 'flex';
+                mapContainer.style.justifyContent = 'center';
+                mapContainer.style.alignItems = 'center';
+                mapContainer.style.color = '#757575'; 
+                mapContainer.style.fontSize = '1.1rem';
+                mapContainer.innerHTML = '등록된 장소가 없습니다';
+                placeListContainer.innerHTML = '';
+                return;
+            }
+
+            confirmedList.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'place-item';
+                itemDiv.innerHTML = `
+                    <span class="place-num">${index + 1}</span>
+                    <span class="place-name">${item.name}</span>
+                `;
+                placeListContainer.appendChild(itemDiv);
+            });
+
+            // 4. 카카오맵 마커 그리기 로직 실행
+            initKakaoMap(confirmedList);
+        });
+
+        // initKakaoMap, initBlankMap 함수는 로직 동일 (유지)
+        function initKakaoMap(list) {
+            const mapContainer = document.getElementById('map');
+            const mapOption = { center: new kakao.maps.LatLng(33.450701, 126.570667), level: 3 };
+            const map = new kakao.maps.Map(mapContainer, mapOption);
+            const bounds = new kakao.maps.LatLngBounds();
+            let hasValidData = false;
+
+            list.forEach((item, index) => {
+                if (item.lat && item.lng) {
+                    const position = new kakao.maps.LatLng(parseFloat(item.lat), parseFloat(item.lng));
+                    hasValidData = true;
+                    const marker = new kakao.maps.Marker({ position: position, map: map });
+                    const infowindow = new kakao.maps.InfoWindow({
+                        content: `<div style="padding:5px; font-size:12px; text-align:center; min-width:100px;">${index + 1}. ${item.name}</div>`
+                    });
+                    infowindow.open(map, marker);
+                    bounds.extend(position);
+                }
+            });
+
+            if (hasValidData) { map.setBounds(bounds); } 
+            else { map.setCenter(new kakao.maps.LatLng(33.450701, 126.570667)); }
+        }
+    </script>
+</body>
+</html>

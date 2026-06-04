@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 정보</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+    <link rel="stylesheet" href="common.css">
+    <style>
+
+        /* 전체 페이지 레이아웃 - 플렉스박스 사용 */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* 화면 전체 높이 사용 */
+            background-color: #fff; /* 메인 배경색: 흰색 */
+        }
+
+        /* --- 메인 콘텐츠 영역 --- */
+        main {
+            flex: 1;
+            padding: 30px 20px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .title {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        /* 프로필 이미지 원형 영역 */
+        .profile-avatar {
+            width: 75px;
+            height: 75px;
+            background-color: #d9d9d9; /* 이미지 없을 때 기본 회색 */
+            border-radius: 50%;
+            margin-bottom: 35px;
+            /* ★ 이미지가 잘 고르게 들어가도록 배경 스타일 추가 */
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* 정보 리스트 래퍼 */
+        .info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px; /* 행 간격 */
+        }
+
+        /* 정보 한 줄 묶음 */
+        .info-row {
+            display: flex;
+            align-items: center;
+        }
+
+        /* 왼쪽 라벨 (이름, 이메일, 고유 코드) */
+        .info-label {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #000;
+            width: 90px; /* 라벨 너비를 고정해서 오른쪽 박스 시작 라인을 맞춤 */
+            flex-shrink: 0;
+        }
+
+        /* 오른쪽 데이터 박스 (둥근 캡슐 모양) */
+        .info-value {
+            background-color: #f1f1f1; /* 연한 회색 알약 박스 */
+            border-radius: 12px; /* 둥근 모서리 */
+            padding: 12px 20px;
+            font-size: 1rem;
+            color: #000;
+            width: 100%;
+            max-width: 450px; /* 박스가 너무 길어지지 않게 제한 */
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="나들이_로고.png" alt="나들이 로고" class="logo" onclick="location.href='home.html'">
+        <div class="menu-container">
+            <div class="hamburger">☰</div>
+            <ul class="dropdown">
+                <li onclick="location.href='myTrip.html'">내 여행</li>
+                <li onclick="location.href='myFriend.html'">내 친구</li>
+                <li onclick="location.href='myPage.html'">내 정보</li>
+                <li onclick="logout()">로그아웃</li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <h2 class="title">내 정보</h2>
+        
+        <!-- ★ 자바스크립트로 접근하기 위해 각각 고유 id를 달아줌 -->
+        <div class="profile-avatar" id="user-avatar"></div>
+
+        <div class="info-list">
+            
+            <div class="info-row">
+                <span class="info-label">이름</span>
+                <div class="info-value" id="user-name">로딩 중...</div>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">이메일</span>
+                <div class="info-value" id="user-email">로딩 중...</div>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">고유 코드</span>
+                <div class="info-value" id="user-code">로딩 중...</div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <img src="나들이_로고_글자.png" alt="나들이 로고" class="logo">
+        <p class="copyright">© 2026. Yeram All rights reserved.</p>
+    </footer>
+
+    <script src="common.js"></script>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            // localStorage에서 로그인할 때 저장했던 유저 정보 꺼내기
+            const loggedInUser = localStorage.getItem('loggedInUser');
+
+            if (loggedInUser) {
+                // 데이터가 존재하면 JSON 형태로 변환
+                const user = JSON.parse(loggedInUser);
+
+                // 화면의 각각 ID 요소에 진짜 데이터 매핑하기
+                document.getElementById('user-name').innerText = user.name;
+                document.getElementById('user-email').innerText = user.email;
+                document.getElementById('user-code').innerText = user.code;
+
+                // 프로필 사진 URL이 있으면 배경 이미지로 적용
+                if (user.profileImg) {
+                    document.getElementById('user-avatar').style.backgroundImage = `url('${user.profileImg}')`;
+                }
+            } else {
+                // 혹시나 로그인 데이터 없이 이 페이지에 들어오면 로그인창으로 튕겨버리기
+                alert('로그인이 필요한 페이지야! 로그인 화면으로 갈게.');
+                location.href = 'login.html';
+            }
+        });
+    </script>
+
+</body>
+</html>

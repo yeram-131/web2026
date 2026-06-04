@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>여행 상세</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+    <link rel="stylesheet" href="common.css">
+    <style>
+        
+        /* 전체 페이지 레이아웃 - 플렉스박스 사용 */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* 화면 전체 높이 사용 */
+            background-color: #fff; /* 메인 배경색: 흰색 */
+        }
+
+        /* --- 메인 콘텐츠 영역 --- */
+        main {
+            flex: 1;
+            padding: 30px 20px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* 여행 요약 정보 헤더 (가로 한 줄 라인) */
+        .detail-header {
+            display: flex;
+            align-items: baseline;
+            padding: 12px;
+            gap: 15px;
+        }
+
+        .back-btn {
+            font-size: 1.5rem;
+            cursor: pointer;
+            font-weight: bold;
+            background: none;
+            border: none;
+            padding: 0 5px;
+        }
+
+        .travel-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        /* 날짜, 장소, 동행인을 오른쪽으로 밀기 위한 래퍼 */
+        .travel-meta {
+            display: flex;
+            gap: 25px;
+            font-size: 0.95rem;
+            margin-left: auto; /* 우측 정렬 효과 */
+            align-items: center;
+        }
+
+        .travel-date {
+            color: #333;
+        }
+
+        /* 1일차 & 일정 추가 행 */
+        .day-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+        }
+
+        .day-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .schedule-btn, .schedule-btn * {
+            font-size: 0.95rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+            padding-left: 15px;
+            color: #606060;
+        }
+
+        /* 일정 리스트 감싸는 큰 박스 */
+        .schedule-container {
+            background-color: #f5f5f5;
+            border-radius: 12px;
+            padding: 25px 20px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* 개별 일정 아이템 (둥근 바 형태) */
+        .schedule-item {
+            background-color: #d9d9d9;
+            border-radius: 10px;
+            padding: 12px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 왼쪽 아이콘 + 장소명 묶음 */
+        .schedule-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* 순서 변경용 햄버거 모양 핸들 아이콘 */
+        .handle-icon {
+            font-size: 1.1rem;
+            color: #333;
+            cursor: grab; /* 잡을 수 있다는 느낌의 커서 */
+        }
+
+        .place-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="나들이_로고.png" alt="나들이 로고" class="logo" onclick="location.href='home.html'">
+        <div class="menu-container">
+            <div class="hamburger">☰</div>
+            <ul class="dropdown">
+                <li onclick="location.href='myTrip.html'">내 여행</li>
+                <li onclick="location.href='myFriend.html'">내 친구</li>
+                <li onclick="location.href='myPage.html'">내 정보</li>
+                <li onclick="logout()">로그아웃</li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <div class="detail-header">
+            <button class="back-btn" onclick="location.href='myTrip.html'">←</button>
+            <span class="travel-title">여행2</span>
+            
+            <div class="travel-meta">
+                <span class="travel-date">2026.05.23 ~ 2026.05.24</span>
+                <span class="travel-location">제주도</span>
+                <span class="travel-companion">홍길동</span>
+            </div>
+        </div>
+
+        
+        <div class="schedule-container">
+            <div class="day-info-row">
+                <h3 class="day-title">1일차</h3>
+                <div class="schedule-btn">
+                    <button onclick="location.href='editPlan.html'">수정</button>
+                    <button onclick="location.href='map.html'">지도에서 보기</button>
+                </div>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-left">
+                    <span class="place-name">아베베 베이커리</span>
+                </div>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-left">
+                    <span class="place-name">맛있는 고기국수</span>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="schedule-container">
+
+            <div class="day-info-row">
+                <h3 class="day-title">2일차</h3>
+                <div class="schedule-btn">
+                    <button>수정</button>
+                    <button>지도에서 보기</button>
+                </div>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-left">
+                    <span class="place-name">으아악</span>
+                </div>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-left">
+                    <span class="place-name">알람좀꺼라</span>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <img src="나들이_로고_글자.png" alt="나들이 로고" class="logo">
+        <p class="copyright">© 2026. Yeram All rights reserved.</p>
+    </footer>
+
+    <script src="common.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            // 👤 로그인한 유저의 고유 코드 분석 및 전용 방 키 조립
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const userCode = loggedInUser ? JSON.parse(loggedInUser).code : 'guest';
+            const tripsKey = `trips_${userCode}`; // 내 계정 전용 여행방 키
+
+            // 1. 주소창에서 ?id=... 값 읽어오기
+            const urlParams = new URLSearchParams(window.location.search);
+            const tripId = urlParams.get('id') || 'trip2'; 
+
+            // 2. 로컬스토리지 내 전용 방에서 여행 정보 찾아서 헤더 바꾸기
+            const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
+            const currentTrip = trips.find(t => t.id === tripId) || trips[1];
+
+            document.querySelector('.travel-title').innerText = currentTrip.name;
+            document.querySelector('.travel-date').innerText = currentTrip.date;
+            document.querySelector('.travel-location').innerText = currentTrip.location;
+            document.querySelector('.travel-companion').innerText = currentTrip.companion;
+
+            // 3. 하드코딩된 기존 상자 지우고 일차(totalDays)만큼 동적 생성
+            const mainContent = document.querySelector('main');
+            const headerBlock = document.querySelector('.detail-header');
+            mainContent.innerHTML = ''; // 초기화
+            mainContent.appendChild(headerBlock); // 헤더는 다시 부착
+
+            for (let d = 1; d <= currentTrip.totalDays; d++) {
+                const scheduleContainer = document.createElement('div');
+                scheduleContainer.className = 'schedule-container';
+                
+                scheduleContainer.innerHTML = `
+                    <div class="day-info-row">
+                        <h3 class="day-title">${d}일차</h3>
+                        <div class="schedule-btn">
+                            <button onclick="location.href='editPlan.html?id=${tripId}&day=${d}'">수정</button>
+                            <button onclick="location.href='map.html?id=${tripId}&day=${d}'">지도에서 보기</button>
+                        </div>
+                    </div>
+                `;
+
+                // 4. 이 여행의 해당 일차에 맞는 진짜 격리된 일정 데이터만 쏙 골라서 그려주기
+                const dayKey = `confirmed_${tripId}_${d}`; // ✨ 계정 격리 키 반영
+                
+                // 테스트용 초기 더미데이터 세팅 로직 (내 방 전용으로 세팅)
+                if (!localStorage.getItem(dayKey)) {
+                    let defaultPlaces = [];
+                    if (tripId === 'trip2' && d === 1) defaultPlaces = ["아베베 베이커리", "맛있는 고기국수"];
+                    if (tripId === 'trip2' && d === 2) defaultPlaces = ["으아악", "알람좀꺼라"];
+                    localStorage.setItem(dayKey, JSON.stringify(defaultPlaces.map(p => ({ name: p }))));
+                }
+
+                const confirmedList = JSON.parse(localStorage.getItem(dayKey)) || [];
+                confirmedList.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'schedule-item';
+                    itemDiv.innerHTML = `<div class="schedule-left"><span class="place-name">${item.name}</span></div>`;
+                    scheduleContainer.appendChild(itemDiv);
+                });
+
+                mainContent.appendChild(scheduleContainer);
+            }
+        });
+    </script>
+</body>
+</html>

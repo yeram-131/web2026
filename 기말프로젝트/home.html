@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="common.css">
+    <title>홈</title>
+    <style>
+        
+        /* 전체 페이지 레이아웃 - 플렉스박스 사용 */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* 화면 전체 높이 사용 */
+            background-color: #fff; /* 메인 배경색: 흰색 */
+        }
+
+        /* --- 메인 콘텐츠 스타일 (박스 세로 배치) --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column; /* 세로로 배치 */
+            gap: 40px; /* 박스 사이의 간격 */
+            padding: 40px 20px;
+            max-width: 1000px; /* 화면이 너무 넓어지지 않게 고정 */
+            margin: 0 auto; /* 중앙 정렬 */
+            width: 100%;
+        }
+
+        .content-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* '내 여행', '내 친구' 같은 작은 라벨 박스 */
+        .section-label {
+            display: inline-block;
+            padding: 5px 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            width: fit-content;
+            cursor: pointer;
+        }
+
+        /* 실제 회색 콘텐츠 박스 */
+        .content-box {
+            background-color: #f5f5f5; /* 회색 박스 */
+            height: 300px; /* 박스 높이 (원하는 대로 조절해) */
+            width: 100%;
+            border-radius: 15px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="나들이_로고.png" alt="나들이 로고" class="logo">
+        <div class="menu-container">
+            <div class="hamburger">☰</div>
+            <ul class="dropdown">
+                <li onclick="location.href='myTrip.html'">내 여행</li>
+                <li onclick="location.href='myFriend.html'">내 친구</li>
+                <li onclick="location.href='myPage.html'">내 정보</li>
+                <li onclick="logout()">로그아웃</li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <!-- ✨ 로그인한 유저 이름이 동적으로 들어갈 공간 추가! -->
+    <div id="welcome-msg" style="font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; color: #202857;">
+        로딩 중...
+    </div>
+
+        <div class="content-section">
+            <div class="section-label" onclick="location.href='myTrip.html'">내 여행</div>
+            <div class="content-box"></div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-label" onclick="location.href='myFriend.html'">내 친구</div>
+            <div class="content-box"></div>
+        </div>
+    </main>
+
+    <footer>
+        <img src="나들이_로고_글자.png" alt="나들이 로고" class="logo">
+        <p class="copyright">© 2026. Yeram All rights reserved.</p>
+    </footer>
+
+    <script src="common.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+
+            if (loggedInUser) {
+                const user = JSON.parse(loggedInUser);
+                document.getElementById('welcome-msg').innerText = `${user.name}님, 어떤 나들이를 떠나볼까요?`;
+
+                const userCode = user.code;
+                const trips = JSON.parse(localStorage.getItem(`trips_${userCode}`)) || [];
+                const friends = JSON.parse(localStorage.getItem(`friends_${userCode}`)) || [];
+
+                const contentBoxes = document.querySelectorAll('.content-box');
+                const tripBox = contentBoxes[0];
+                const friendBox = contentBoxes[1];
+
+                // ✈️ 1. 내 여행 목록 출력 (연회색 박스를 꽉 채우도록 최대 6개로 확장)
+                if (trips.length === 0) {
+                    tripBox.innerHTML = `<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#757575; font-size:0.95rem;">등록된 여행이 없습니다</div>`;
+                } else {
+                    // 내부 레이아웃 설정: 스크롤이 생겨도 박스 밖으로 탈출하지 않게 제한
+                    tripBox.style.padding = '20px';
+                    tripBox.style.display = 'flex';
+                    tripBox.style.flexDirection = 'column';
+                    tripBox.style.overflowY = 'auto'; 
+                    
+                    // 최대 6개까지만 보여주기 (.slice(0, 6))
+                    let tripHtml = trips.slice(0, 6).map(t => `
+                        <div onclick="location.href='tripDetail.html?id=${t.id}'" style="background:white; padding:12px 20px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:between; font-weight:bold; cursor:pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); flex-shrink: 0;">
+                            <span style="color:#202857;">✈️ ${t.name}</span>
+                            <span style="margin-left:auto; font-size:0.85rem; color:#666; font-weight:normal;">${t.date}</span>
+                        </div>
+                    `).join('');
+                    
+                    // [더보기] 버튼 (스크롤을 내려도 항상 목록 맨 아래에 부드럽게 붙어있음)
+                    tripHtml += `
+                        <div onclick="location.href='myTrip.html'" style="margin-top: 10px; text-align:right; font-size:0.9rem; color:#666; font-weight:bold; cursor:pointer; text-decoration:underline; text-underline-offset:3px; padding-right:5px; padding-bottom:5px; flex-shrink: 0;">
+                            내 여행 더보기 +
+                        </div>
+                    `;
+                    tripBox.innerHTML = tripHtml;
+                }
+
+                // 👥 2. 내 친구 목록 출력 (연회색 박스를 꽉 채우도록 최대 6명으로 확장)
+                if (friends.length === 0) {
+                    friendBox.innerHTML = `<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#757575; font-size:0.95rem;">등록된 친구가 없습니다</div>`;
+                } else {
+                    friendBox.style.padding = '20px';
+                    friendBox.style.display = 'flex';
+                    friendBox.style.flexDirection = 'column';
+                    friendBox.style.overflowY = 'auto';
+                    
+                    // 최대 6명까지만 보여주기 (.slice(0, 6))
+                    let friendHtml = friends.slice(0, 6).map(f => `
+                        <div style="background:white; padding:12px 20px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:between; align-items:center; font-weight:bold; flex-shrink: 0;">
+                            <span style="color:#000;">👤 ${f.name}</span>
+                            <span style="margin-left:auto; font-size:0.85rem; background:#f1f1f1; padding:3px 8px; border-radius:4px; color:#555; font-weight:normal;">${f.code}</span>
+                        </div>
+                    `).join('');
+                    
+                    // [더보기] 버튼
+                    friendHtml += `
+                        <div onclick="location.href='myFriend.html'" style="margin-top: 10px; text-align:right; font-size:0.9rem; color:#666; font-weight:bold; cursor:pointer; text-decoration:underline; text-underline-offset:3px; padding-right:5px; padding-bottom:5px; flex-shrink: 0;">
+                            내 친구 더보기 +
+                        </div>
+                    `;
+                    friendBox.innerHTML = friendHtml;
+                }
+
+            } else {
+                alert('로그인이 필요한 페이지입니다');
+                location.href = 'login.html';
+            }
+        });
+    </script>
+</body>
+</html>

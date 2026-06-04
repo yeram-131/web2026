@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>여행 추가</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+    <link rel="stylesheet" href="common.css">
+    
+    <style>
+        /* 전체 페이지 레이아웃 - 플렉스박스 사용 */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* 화면 전체 높이 사용 */
+            background-color: #fff; /* 메인 배경색: 흰색 */
+        }
+        /* --- 메인 콘텐츠 영역 --- */
+        main {
+            flex: 1;
+            padding: 30px 20px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .title {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        /* 입력 폼 전체를 감싸는 큰 회색 박스 */
+        .form-container {
+            background-color: #f5f5f5; /* 아주 밝은 회색 배경 */
+            border-radius: 12px;
+            padding: 35px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* 질문 간의 간격 */
+            position: relative; /* 버튼 배치를 위한 기준점 */
+        }
+
+        /* 개별 질문 묶음 */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* 질문 텍스트와 입력창 간격 */
+        }
+
+        .form-group label {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #000;
+        }
+
+        /* 공통 입력창(input, select) 스타일 */
+        .form-group input, .form-group select {
+            background-color: #d9d9d9; /* 이미지 속 회색 input 반영 */
+            border: 1px solid #999;
+            padding: 10px 15px;
+            font-size: 0.95rem;
+            color: #333;
+            width: 100%;
+        }
+
+        /* 인풋창 내부 placeholder 글자 색상 */
+        .form-group input::placeholder {
+            color: #757575;
+        }
+
+        /* 1번: 어떤 여행인가요? (가로로 긴 박스) */
+        .input-large {
+            max-width: 500px;
+        }
+
+        /* 2번: 언제 떠나볼까요? (시작일, 종료일 나란히 배치) */
+        .date-group {
+            display: flex;
+            gap: 15px;
+            max-width: 550px;
+        }
+
+        /* 3번, 4번: 짧은 박스들 크기 제한 */
+        .input-short {
+            max-width: 270px;
+        }
+
+        /* 4번: 누구와 가나요? 드롭다운 스타일 커스텀 */
+        select.input-short {
+            cursor: pointer;
+            /* 브라우저 기본 화살표 스타일을 유지하거나 다듬기 위함 */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            /* 삼각형 아이콘 직접 넣기 (이미지 형태 반영) */
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            padding-right: 40px;
+        }
+
+        /* 하단 정렬용 래퍼 (4번 질문과 추가 버튼을 가로 배치) */
+        .bottom-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end; /* 아래쪽 라인 맞추기 */
+            width: 100%;
+        }
+
+        /* 5번: 추가 버튼 */
+        .submit-btn {
+            background-color: #e2f0d9; /* 이미지 속 연그린색 */
+            border: 1px solid #70ad47; /* 짙은 그린색 테두리 */
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #cddcb4;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <img src="나들이_로고.png" alt="나들이 로고" class="logo" onclick="location.href='home.html'">
+        <div class="menu-container">
+            <div class="hamburger">☰</div>
+            <ul class="dropdown">
+                <li onclick="location.href='myTrip.html'">내 여행</li>
+                <li onclick="location.href='myFriend.html'">내 친구</li>
+                <li onclick="location.href='myPage.html'">내 정보</li>
+                <li onclick="logout()">로그아웃</li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <h2 class="title">새 여행 추가</h2>
+        
+        <div class="form-container">
+            
+            <div class="form-group">
+                <label>어떤 여행인가요?</label>
+                <input type="text" id="trip-name" placeholder="별명" class="input-large">
+            </div>
+
+            <div class="form-group">
+                <label>언제 떠나볼까요?</label>
+                <div class="date-group">
+                    <input type="text" id="start-date" placeholder="시작일" onfocus="(this.type='date')" onblur="if(!this.value) this.type='text'">
+                    <input type="text" id="end-date" placeholder="종료일" onfocus="(this.type='date')" onblur="if(!this.value) this.type='text'">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>어디로 가볼까요?</label>
+                <input type="text" id="trip-location" placeholder="여행지" class="input-short">
+            </div>
+
+            <div class="bottom-row">
+                <div class="form-group" style="flex: 1;">
+                    <label>누구와 가나요?</label>
+                    <select id="trip-companion" class="input-short">
+                        </select>
+                </div>
+                
+                <button type="button" class="submit-btn" onclick="addNewTrip()">추가</button>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <img src="나들이_로고_글자.png" alt="나들이 로고" class="logo">
+        <p class="copyright">© 2026. Yeram All rights reserved.</p>
+    </footer>
+
+    <script src="common.js"></script>
+    <script>
+        // 👤 로그인한 유저의 고유 코드 분석 및 전용 방 키 조립
+        const loggedInUser = localStorage.getItem('loggedInUser');
+        const userCode = loggedInUser ? JSON.parse(loggedInUser).code : 'guest';
+        const tripsKey = `trips_${userCode}`; 
+
+        window.addEventListener('DOMContentLoaded', function() {
+            const friendsKey = `friends_${userCode}`; 
+
+            if (localStorage.getItem(friendsKey) === null) {
+                const sampleFriends = [
+                    { name: "홍길동", code: "HONG12", trips: "함께한 여행 1개" },
+                    { name: "김지연", code: "KIM345", trips: "함께한 여행 0개" }
+                ];
+                localStorage.setItem(friendsKey, JSON.stringify(sampleFriends));
+            }
+
+            const friends = JSON.parse(localStorage.getItem(friendsKey)) || [];
+            const companionSelect = document.getElementById('trip-companion');
+            companionSelect.innerHTML = ''; 
+
+            // 1. '혼자' 선택지 생성 (value를 "혼자"로 세팅)
+            const aloneOption = document.createElement('option');
+            aloneOption.value = "혼자";
+            aloneOption.innerText = "혼자";
+            companionSelect.appendChild(aloneOption);
+
+            // 2. ⭐ [핵심 수정] value에 이름 대신 고유 'code'를 심어주기!
+            friends.forEach(friend => {
+                const option = document.createElement('option');
+                option.value = friend.code; // ◀ 이름 대신 코드를 밸류로 매핑!
+                option.innerText = friend.name; // 화면에는 이름 표시
+                companionSelect.appendChild(option);
+            });
+        });
+
+        // 🚀 여행 등록 함수
+        function addNewTrip() {
+            const name = document.getElementById('trip-name').value.trim();
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            const location = document.getElementById('trip-location').value.trim();
+            
+            // select 박스에서 선택된 밸류(코드가 들어옴, 혼자일 땐 "혼자")
+            const companionValue = document.getElementById('trip-companion').value;
+
+            if (!name || !startDate || !endDate || !location) {
+                alert('모든 항목을 입력해 주세요');
+                return;
+            }
+
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+            if (end < start) {
+                alert('날짜를 다시 확인해 주세요');
+                return;
+            }
+
+            const diffTime = Math.abs(end - start);
+            const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+            const formatDate = (dateStr) => dateStr.replace(/-/g, '.');
+            const formattedDateRange = `${formatDate(startDate)} ~ ${formatDate(endDate)}`;
+
+            // 동행인 화면 노출용 이름 정하기
+            let companionName = "혼자";
+            if (companionValue !== "혼자") {
+                const allUsers = JSON.parse(localStorage.getItem('all_users')) || [];
+                const target = allUsers.find(u => u.code === companionValue);
+                if (target) companionName = target.name;
+            }
+
+            // 3. 내 전용방에 넣을 여행 데이터 빌드 (companion에 진짜 이름 저장)
+            const tripId = 'trip_' + Date.now(); 
+            const newTrip = {
+                id: tripId, 
+                name: name,
+                date: formattedDateRange,
+                location: location,
+                companion: companionName, // 화면 표시용 진짜 이름
+                totalDays: totalDays
+            };
+
+            // 내 방에 우선 저장
+            const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
+            trips.push(newTrip);
+            localStorage.setItem(tripsKey, JSON.stringify(trips));
+
+            // 4. ⭐ [연동 버그 해결완료] '혼자'가 아니라면 상대방 코드 방을 '직접' 열어서 강제 주입!
+            if (companionValue !== "혼자") {
+                const companionTripsKey = `trips_${companionValue}`; // 코드로 방 키를 만드니까 100% 정확함!
+                const companionTrips = JSON.parse(localStorage.getItem(companionTripsKey)) || [];
+                
+                const myInfo = JSON.parse(localStorage.getItem('loggedInUser'));
+                
+                // 상대방 시점의 여행 데이터 조립 (동행인이 '내 진짜 이름'으로 바뀜)
+                const companionTrip = {
+                    id: tripId, // 같은 ID 공유
+                    name: name,
+                    date: formattedDateRange,
+                    location: location,
+                    companion: myInfo.name, 
+                    totalDays: totalDays
+                };
+                
+                companionTrips.push(companionTrip);
+                localStorage.setItem(companionTripsKey, JSON.stringify(companionTrips));
+            }
+
+            alert('새 여행 목록이 추가되었습니다! 친구의 여행 목록에도 연동되었어요.');
+            
+            setTimeout(function() {
+                window.location.href = 'myTrip.html';
+            }, 100);
+        }
+    </script>
+</body>
+</html>
