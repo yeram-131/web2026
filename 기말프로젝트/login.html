@@ -123,7 +123,7 @@
         window.onload = function () {
             // 1. 구글 초기화
             googleTokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: '955531133705-ao2gsbudshajr7fqo7u8i5ab7vslf9mo.apps.googleusercontent.com', // ★ 여기에 구글 ID 입력
+                client_id: ' ', // 구글 ID
                 scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
                 callback: (tokenResponse) => {
                     if (tokenResponse && tokenResponse.access_token) {
@@ -136,7 +136,7 @@
                                 name: userInfo.name,
                                 email: userInfo.email,
                                 profileImg: userInfo.picture,
-                                code: 'G-' + userInfo.sub.slice(-6).toUpperCase() // ✨ 앞자리 대신 뒷자리 6자 사용!
+                                code: 'G-' + userInfo.sub.slice(-6).toUpperCase() // 뒷자리 6자 사용
                             });
                         });
                     }
@@ -145,7 +145,7 @@
 
             // 2. 카카오 초기화
             if (typeof Kakao !== 'undefined') {
-                Kakao.init('52c189f6d3ae45119ab513a6d7a4fb85'); // 카카오 JavaScript 키
+                Kakao.init(' '); // 카카오 JavaScript 키
             }
         };
 

@@ -176,7 +176,7 @@
         const friendsKey = `friends_${userCode}`; // 내 계정 전용 친구방
 
         window.addEventListener('DOMContentLoaded', function() {
-            // 덮어쓰기 방지: 스토리지에 키 자체가 아예 존재하지 않을 때(null)만 초기 더미데이터 세팅
+            // 덮어쓰기 방지: 스토리지에 키 자체가 아예 존재하지 않을 때만 초기 더미데이터 세팅
             if (localStorage.getItem(friendsKey) === null) {
                 const defaultFriends = [
                     { name: "홍길동", code: "HONG12", trips: "함께한 여행 1개" },
@@ -188,14 +188,14 @@
             renderFriends();
         });
 
-        // 👥 친구 목록을 화면에 동적으로 그려주는 함수
+        //친구 목록을 화면에 동적으로 그려주는 함수
         function renderFriends() {
             const listContainer = document.getElementById('friend-list');
             listContainer.innerHTML = '';
 
             const friends = JSON.parse(localStorage.getItem(friendsKey)) || [];
 
-            // ✨ 추가: 내가 만든 진짜 여행 목록 불러오기 (개수 계산용)
+            // 내가 만든 진짜 여행 목록 불러오기 (개수 계산용)
             const tripsKey = `trips_${userCode}`;
             const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
 
@@ -223,7 +223,7 @@
 
         function addFriendByCode() {
             const codeInput = document.getElementById('friend-code');
-            const code = codeInput.value.trim();
+            const code = codeInput.value.trim().toUpperCase(); 
 
             if (!code) {
                 alert('친구의 고유 코드를 입력해 주세요');
@@ -231,19 +231,23 @@
             }
 
             if (code === userCode) {
-                alert('나 자신을 친구로 추가할 수는 없습니다');
+                alert('나 자신을 친구로 추가할 수 없습니다');
                 return;
             }
 
             const allUsers = JSON.parse(localStorage.getItem('all_users')) || [];
-            const targetUser = allUsers.find(user => user.code === code);
+            let targetUser = allUsers.find(user => user.code === code);
 
             if (!targetUser) {
-                alert('입력한 고유 코드에 일치하는 사용자가 존재하지 않습니다');
-                return;
+             
+                let virtualName = code.startsWith('G-') ? `구글친구_${code.slice(-4)}` : `카카오친구_${code.slice(-4)}`;
+                targetUser = { name: virtualName, code: code };
+                
+                allUsers.push(targetUser);
+                localStorage.setItem('all_users', JSON.stringify(allUsers));
             }
 
-            // 내 친구 목록에 추가
+            // 내 친구 목록에 추가 시도
             const myFriends = JSON.parse(localStorage.getItem(friendsKey)) || [];
             const isAlreadyFriend = myFriends.some(f => f.code === code);
 
@@ -260,7 +264,6 @@
             localStorage.setItem(friendsKey, JSON.stringify(myFriends));
 
             const targetFriendsKey = `friends_${targetUser.code}`;
-            
             const targetFriends = JSON.parse(localStorage.getItem(targetFriendsKey)) || [];
             const isAlreadyTargetFriend = targetFriends.some(f => f.code === userCode);
 
@@ -268,18 +271,16 @@
                 const myInfo = localStorage.getItem('loggedInUser');
                 if (myInfo) {
                     const myParsed = JSON.parse(myInfo);
-                    
                     targetFriends.push({
                         name: myParsed.name, 
                         code: userCode,      
                         trips: "함께한 여행 0개"
                     });
-                    
                     localStorage.setItem(targetFriendsKey, JSON.stringify(targetFriends));
                 }
             }
 
-            alert(`${targetUser.name}님과 친구가 되었습니다! (쌍방 연동 완료)`);
+            alert(`${targetUser.name}님과 친구가 되었습니다`);
             codeInput.value = '';
             renderFriends();
         }
