@@ -203,13 +203,13 @@
             const companionSelect = document.getElementById('trip-companion');
             companionSelect.innerHTML = ''; 
 
-            // 1. '혼자' 선택지 생성 (value를 "혼자"로 세팅)
+            // '혼자' 선택지 생성
             const aloneOption = document.createElement('option');
             aloneOption.value = "혼자";
             aloneOption.innerText = "혼자";
             companionSelect.appendChild(aloneOption);
 
-            // 2. ⭐ [핵심 수정] value에 이름 대신 고유 'code'를 심어주기!
+            // value에 이름 대신 고유 'code'
             friends.forEach(friend => {
                 const option = document.createElement('option');
                 option.value = friend.code; // ◀ 이름 대신 코드를 밸류로 매핑!
@@ -218,7 +218,7 @@
             });
         });
 
-        // 🚀 여행 등록 함수
+        // 여행 등록 함수
         function addNewTrip() {
             const name = document.getElementById('trip-name').value.trim();
             const startDate = document.getElementById('start-date').value;
@@ -255,7 +255,7 @@
                 if (target) companionName = target.name;
             }
 
-            // 3. 내 전용방에 넣을 여행 데이터 빌드 (companion에 진짜 이름 저장)
+            // 3. 내 전용방에 넣을 여행 데이터 빌드
             const tripId = 'trip_' + Date.now(); 
             const newTrip = {
                 id: tripId, 
@@ -271,14 +271,14 @@
             trips.push(newTrip);
             localStorage.setItem(tripsKey, JSON.stringify(trips));
 
-            // 4. ⭐ [연동 버그 해결완료] '혼자'가 아니라면 상대방 코드 방을 '직접' 열어서 강제 주입!
+            // '혼자'가 아니라면 상대방 코드 방 열어서
             if (companionValue !== "혼자") {
                 const companionTripsKey = `trips_${companionValue}`; // 코드로 방 키를 만드니까 100% 정확함!
                 const companionTrips = JSON.parse(localStorage.getItem(companionTripsKey)) || [];
                 
                 const myInfo = JSON.parse(localStorage.getItem('loggedInUser'));
                 
-                // 상대방 시점의 여행 데이터 조립 (동행인이 '내 진짜 이름'으로 바뀜)
+                // 상대방 시점의 여행 데이터 조립
                 const companionTrip = {
                     id: tripId, // 같은 ID 공유
                     name: name,
@@ -292,7 +292,7 @@
                 localStorage.setItem(companionTripsKey, JSON.stringify(companionTrips));
             }
 
-            alert('새 여행 목록이 추가되었습니다! 친구의 여행 목록에도 연동되었어요.');
+            alert('새 여행 목록이 추가되었습니다. 친구의 여행 목록에도 연동되었습니다.');
             
             setTimeout(function() {
                 window.location.href = 'myTrip.html';

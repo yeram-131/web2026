@@ -63,7 +63,7 @@
             color: #333;
         }
 
-        /* --- #1 카카오맵 컨테이너 --- */
+        /* 카카오맵 컨테이너 */
         #map {
             width: 100%;
             height: 350px;
@@ -72,7 +72,7 @@
             margin-bottom: 25px;
         }
 
-        /* --- #2 하단 장소 리스트 --- */
+        /* 하단 장소 리스트 */
         .place-list {
             display: flex;
             flex-direction: column;
@@ -143,19 +143,19 @@
     <script src="common.js"></script>
     <script>
         window.addEventListener('DOMContentLoaded', function() {
-            // 1. 주소창 파라미터 분석
+            // 주소창 파라미터 분석
             const urlParams = new URLSearchParams(window.location.search);
             const tripId = urlParams.get('id') || 'trip2';
             const day = urlParams.get('day') || '1';
 
-            // 👤 로그인한 유저의 고유 코드 분석
+            // 로그인한 유저의 고유 코드 분석
             const loggedInUser = localStorage.getItem('loggedInUser');
             const userCode = loggedInUser ? JSON.parse(loggedInUser).code : 'guest';
             
-            // ⭐ [싱크 일치] 통합 확정 일정 키 매핑
+            // 통합 확정 일정 키 매핑
             const dayKey = `confirmed_${tripId}_${day}`; 
 
-            // 2. 헤더 메타데이터 연동 (내 계정 전용 방에서)
+            // 헤더 메타데이터 연동 
             const tripsKey = `trips_${userCode}`;
             const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
             const currentTrip = trips.find(t => t.id === tripId) || trips[1];

@@ -114,7 +114,7 @@
         .handle-icon {
             font-size: 1.1rem;
             color: #333;
-            cursor: grab; /* 잡을 수 있다는 느낌의 커서 */
+            cursor: grab; 
         }
 
         .place-name {
@@ -200,16 +200,16 @@
 
     <script src="common.js"></script>
     <script>
-        // 1. 전역 변수로 주소창 정보 분석 및 고유 스토리지 키 생성
+        // 전역 변수로 주소창 정보 분석 및 고유 스토리지 키 생성
         const urlParams = new URLSearchParams(window.location.search);
         const tripId = urlParams.get('id') || 'trip2';
         const day = urlParams.get('day') || '1';
 
-        // 👤 로그인한 유저 분석
+        // 로그인한 유저 분석
         const loggedInUser = localStorage.getItem('loggedInUser');
         const userCode = loggedInUser ? JSON.parse(loggedInUser).code : 'guest';
         
-        // ⭐ [싱크 일치] 다른 공유 페이지들과 100% 일치하는 통합 키 고정!
+       
         const dayKey = `confirmed_${tripId}_${day}`; 
 
         let draggedIndex = null; 

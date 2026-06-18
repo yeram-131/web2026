@@ -4,12 +4,12 @@ body, h1, h2, h3, p, ul, li, button, input {
     padding: 0;
     font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
     box-sizing: border-box;
-    list-style: none; /* 리스트 점 기호 제거 */
+    list-style: none; 
 }
 
 a {
-    text-decoration: none; /* 밑줄 없애기 */
-    color: inherit;        /* 파란색 대신 부모 요소의 글자색을 그대로 따라가기 */
+    text-decoration: none; 
+    color: inherit;        
 }
 
 [onclick] {
@@ -21,9 +21,9 @@ a {
 /* 상단 헤더 스타일 */
 header {
     display: flex;
-    justify-content: space-between; /* 로고와 메뉴를 양 끝으로 배치 */
+    justify-content: space-between;
     align-items: center;
-    background-color: #202857; /* 회색 배경 */
+    background-color: #202857;
     padding: 5px;
     color: #333;
 }
@@ -50,7 +50,7 @@ header .logo {
 
 /* 드롭다운 메뉴 숨김 처리 */
 .dropdown {
-    display: none; /* 기본 상태에서는 안 보임 */
+    display: none;
     position: absolute;
     top: 60px;
     right: 0;
@@ -78,14 +78,14 @@ header .logo {
 }
 
 /* 햄버거 아이콘에 마우스 올리면 드롭다운 메뉴 등장 */
-/* ① PC 환경: 마우스 호버가 가능한 기기에서만 작동 */
+/* PC 환경: 마우스 호버가 가능한 기기에서만 작동 */
 @media (hover: hover) {
     .menu-container:hover .dropdown {
         display: block;
     }
 }
 
-/* ② 모바일 환경 및 클릭 제어용: show 클래스가 붙으면 무조건 보이기 */
+/* 모바일 환경 및 클릭 제어용: show 클래스가 붙으면 무조건 보이기 */
 .dropdown.show {
     display: block !important;
 }

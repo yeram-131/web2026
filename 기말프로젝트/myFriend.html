@@ -205,7 +205,7 @@
             }
 
             friends.forEach((friend, index) => {
-                // ✨ 추가: 내 여행 목록 중 동행인(companion) 이름이 이 친구 이름과 똑같은 것만 필터링해서 개수 세기
+                // 친구와 함께한 여행 개수
                 const sharedCount = trips.filter(t => t.companion === friend.name).length;
 
                 const itemDiv = document.createElement('div');
@@ -221,7 +221,6 @@
             });
         }
 
-        // ➕ 고유 코드로 진짜 유저를 조회해서 내 친구 및 상대방 친구로 동시 등록! (예외 처리 완벽 보완)
         function addFriendByCode() {
             const codeInput = document.getElementById('friend-code');
             const code = codeInput.value.trim();
@@ -244,7 +243,7 @@
                 return;
             }
 
-            // 1) 내 친구 목록에 추가
+            // 내 친구 목록에 추가
             const myFriends = JSON.parse(localStorage.getItem(friendsKey)) || [];
             const isAlreadyFriend = myFriends.some(f => f.code === code);
 
@@ -260,10 +259,8 @@
             });
             localStorage.setItem(friendsKey, JSON.stringify(myFriends));
 
-            // 2) ⭐ [방어 코드 핵심 보완] 상대방 친구 목록방에도 나를 안정적으로 주입!
             const targetFriendsKey = `friends_${targetUser.code}`;
             
-            // 상대방 방이 비어있으면(null) 깨지지 않게 무조건 빈 배열([])로 초기화해서 받아옴
             const targetFriends = JSON.parse(localStorage.getItem(targetFriendsKey)) || [];
             const isAlreadyTargetFriend = targetFriends.some(f => f.code === userCode);
 
@@ -272,14 +269,12 @@
                 if (myInfo) {
                     const myParsed = JSON.parse(myInfo);
                     
-                    // 상대방 시점의 내 정보 객체 빌드 (이름과 코드를 정확하게 분리해서 저장)
                     targetFriends.push({
-                        name: myParsed.name, // 내 진짜 이름 (예: "서예람")
-                        code: userCode,      // 내 고유 코드 (예: "G-XXXXXX")
+                        name: myParsed.name, 
+                        code: userCode,      
                         trips: "함께한 여행 0개"
                     });
                     
-                    // 상대방 로컬스토리지에 확실하게 덮어쓰기 저장
                     localStorage.setItem(targetFriendsKey, JSON.stringify(targetFriends));
                 }
             }
@@ -289,18 +284,18 @@
             renderFriends();
         }
 
-        // ✖ 친구 삭제 함수 (연쇄 여행 동행인 변경 로직 추가)
+        // 친구 삭제
         function deleteFriend(index) {
             const myFriends = JSON.parse(localStorage.getItem(friendsKey)) || [];
             const targetFriendName = myFriends[index].name; // 삭제할 친구 이름 백업
 
             if (confirm(`'${targetFriendName}' 친구를 삭제하시겠습니까?\n친구와 함께한 여행이 '혼자'로 변경됩니다`)) {
                 
-                // 1) 내 친구 목록에서 삭제 처리
+                // 내 친구 목록에서 삭제 처리
                 myFriends.splice(index, 1);
                 localStorage.setItem(friendsKey, JSON.stringify(myFriends));
 
-                // 2) ⭐ [연동 핵심] 내 여행 목록방을 열어서 동행인이 이 친구였던 여행을 전부 '혼자'로 교체
+                // 동행인이 포함된 여행을 '혼자'로 교체
                 const tripsKey = `trips_${userCode}`;
                 const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
                 
@@ -317,7 +312,7 @@
                 }
 
                 alert(`친구 삭제가 완료되었습니다`);
-                renderFriends(); // 화면 새로고침
+                renderFriends(); 
             }
         }
     </script>

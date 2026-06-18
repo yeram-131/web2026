@@ -145,7 +145,7 @@
 
             // 2. 카카오 초기화
             if (typeof Kakao !== 'undefined') {
-                Kakao.init('52c189f6d3ae45119ab513a6d7a4fb85'); // ★ 여기에 카카오 JavaScript 키 입력
+                Kakao.init('52c189f6d3ae45119ab513a6d7a4fb85'); // 카카오 JavaScript 키
             }
         };
 
@@ -180,7 +180,7 @@
         function saveAndRedirect(userData) {
             localStorage.setItem('loggedInUser', JSON.stringify(userData));
             
-            // 👥 추가된 부분: 전체 회원 명부(all_users)에 등록해서 친구 찾기가 가능하게 만듦
+            // 전체 회원 명부에 등록해서 친구 찾기가 가능하게
             const allUsers = JSON.parse(localStorage.getItem('all_users')) || [];
             const isExist = allUsers.some(user => user.code === userData.code);
             if (!isExist) {

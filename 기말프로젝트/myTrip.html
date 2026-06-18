@@ -8,12 +8,11 @@
     <link rel="stylesheet" href="common.css">
     <style>
         
-        /* 전체 페이지 레이아웃 - 플렉스박스 사용 */
         body {
             display: flex;
             flex-direction: column;
-            min-height: 100vh; /* 화면 전체 높이 사용 */
-            background-color: #fff; /* 메인 배경색: 흰색 */
+            min-height: 100vh;
+            background-color: #fff; 
         }
 
         /* --- 메인 콘텐츠 영역 --- */
@@ -31,7 +30,6 @@
             margin-bottom: 25px;
         }
 
-        /* 새 여행 추가 버튼 */
         .add-btn {
             display: inline-block;
             background: none;
@@ -42,23 +40,21 @@
             margin-bottom: 15px;
         }
 
-        /* 큰 연회색 배경 박스 */
         .trip-box-container {
-            background-color: #f5f5f5; /* 아주 밝은 회색 */
+            background-color: #f5f5f5; 
             border-radius: 12px;
             padding: 30px 20px;
             display: flex;
             flex-direction: column;
-            gap: 15px; /* 리스트 사이 간격 */
+            gap: 15px; 
         }
 
-        /* 여행 정보 가로 한 줄 (둥근 회색 알약 모양) */
         .trip-item {
             background-color: #d9d9d9;
-            border-radius: 10px; /* 양 끝이 둥근 모양 */
+            border-radius: 10px; 
             padding: 15px 30px;
             display: flex;
-            justify-content: space-between; /* 요소들을 가로로 균등 분할 배치 */
+            justify-content: space-between; 
             align-items: center;
         }
 
@@ -119,19 +115,17 @@
         <h2 class="title">내 여행</h2>
         <p class="add-btn" onclick="location.href='addTrip.html'">새 여행 추가 +</p>
 
-        <!-- 자바스크립트가 동적으로 리스트를 생성할 공간 -->
         <div class="trip-box-container"></div>
     </main>
 
     <script src="common.js"></script>
     <script>
-        // 👤 로그인한 유저의 고유 유저 키 획득 및 전용 여행 방 키 조립
         const loggedInUser = localStorage.getItem('loggedInUser');
         const userCode = loggedInUser ? JSON.parse(loggedInUser).code : 'guest';
         const tripsKey = `trips_${userCode}`; 
 
         window.addEventListener('DOMContentLoaded', function() {
-            // 최초 실행 시 데이터가 없을 때만 유저 전용방에 샘플 데이터 세팅 (ID에 유저코드 결합해서 격리)
+            // 최초 실행 시 데이터가 없을 때만 유저 전용방에 샘플 데이터 세팅
             if (!localStorage.getItem(tripsKey)) {
                 const sampleTrips = [
                     { id: `trip1_${userCode}`, name: "여행1", date: "2026.05.25 ~ 2026.05.25", location: "숙대입구", companion: "혼자", totalDays: 1 },
@@ -140,17 +134,16 @@
                 localStorage.setItem(tripsKey, JSON.stringify(sampleTrips));
             }
 
-            // 2. 내 전용 방에서 여행 목록 꺼내와서 화면에 그리기
             renderTrips();
         });
 
-        // 📜 내 여행 목록을 화면에 동적으로 렌더링해주는 함수
+        // 내 여행 목록을 화면에 동적으로 렌더링
         function renderTrips() {
             const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
             const container = document.querySelector('.trip-box-container');
             container.innerHTML = ''; // 기존 리스트 초기화
 
-            // 등록된 여행이 하나도 없을 때의 예외 처리 안내문
+            // 등록된 여행이 없을 때
             if (trips.length === 0) {
                 container.innerHTML = `<div style="padding: 30px; text-align: center; color: #888; font-size: 0.95rem;">아직 추가된 여행이 없습니다</div>`;
                 return;
@@ -161,7 +154,6 @@
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'trip-item';
                 
-                // ★ 핵심 수정: [수정], [삭제] 링크에 해당 아이템의 index를 넘겨주고 return false; 처리
                 itemDiv.innerHTML = `
                     <span class="trip-name" onclick="location.href='tripDetail.html?id=${trip.id}'" style="cursor:pointer;">${trip.name}</span>
                     <span class="trip-date">${trip.date}</span>
@@ -176,7 +168,7 @@
             });
         }
 
-        // ✏️ [수정] 링크 클릭 시 동작: 여행 이름(별명) 변경
+        // 수정
         function editTripName(index) {
             const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
             const newName = prompt('여행 이름을 변경합니다', trips[index].name);
@@ -189,7 +181,7 @@
             }
         }
 
-        // ✖ [삭제] 링크 클릭 시 동작: 여행 삭제 및 하위 일정 청소
+        // 삭제
         function deleteTrip(index) {
             const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
             const targetTrip = trips[index];
@@ -197,13 +189,11 @@
             // 지우기 전에 진짜 지울 건지 사용자에게 더블 체크
             if (confirm(`'${targetTrip.name}' 여행을 지우시겠습니까?\n해당 여행의 모든 데이터가 삭제됩니다.`)) {
                 
-                // 1) 데이터 찌꺼기가 남지 않게 이 여행의 총 일차(totalDays)만큼 돌면서 확정/제안 데이터 삭제
                 for (let d = 1; d <= targetTrip.totalDays; d++) {
                     localStorage.removeItem(`confirmed_${userCode}_${targetTrip.id}_${d}`);
                     localStorage.removeItem(`suggested_${userCode}_${targetTrip.id}_${d}`);
                 }
 
-                // 2) 내 메인 여행 목록 배열에서 해당 데이터 잘라내고 로컬스토리지 저장
                 trips.splice(index, 1);
                 localStorage.setItem(tripsKey, JSON.stringify(trips));
 

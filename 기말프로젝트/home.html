@@ -100,7 +100,7 @@
                 const tripsKey = `trips_${userCode}`;
                 const friendsKey = `friends_${userCode}`;
 
-                // 📌 순수 데이터 읽기 (더미데이터 초기화 코드는 싹 걷어내고 login.html로 완벽 분리!)
+            
                 const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
                 const friends = JSON.parse(localStorage.getItem(friendsKey)) || [];
 
@@ -108,7 +108,7 @@
                 const tripBox = contentBoxes[0];
                 const friendBox = contentBoxes[1];
 
-                // ✈️ 1. 내 여행 목록 출력 (최대 6개 + 깜빡임 없는 단정한 알림 글자 적용)
+                // 내 여행 목록 출력 
                 if (trips.length === 0) {
                     tripBox.innerHTML = `<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#757575; font-size:0.95rem;">등록된 여행이 없습니다</div>`;
                 } else {
@@ -118,13 +118,13 @@
                     tripBox.style.overflowY = 'auto'; 
                     
                     let tripHtml = trips.slice(0, 6).map(t => {
-                        // [알림 알고리즘] 총 일차 중 친구가 제안한 pending 상태의 일정이 존재하는지 검사
+                        // 총 일차 중 친구가 제안한 pending 상태의 일정이 존재하는지 검사
                         let hasNewSuggestion = false;
                         for (let d = 1; d <= t.totalDays; d++) {
                             const suggestedKey = `suggested_${t.id}_${d}`;
                             const suggestedList = JSON.parse(localStorage.getItem(suggestedKey)) || [];
                             
-                            // 내가 보낸 게 아닌(proposerCode !== userCode) 대기 일정 탐색
+                            // 내가 보낸 게 아닌 대기 일정 탐색
                             const friendProposalExist = suggestedList.some(item => item.proposerCode !== userCode);
                             if (friendProposalExist) {
                                 hasNewSuggestion = true;
@@ -132,7 +132,7 @@
                             }
                         }
 
-                        // 요구사항 반영: 깜빡임 애니메이션 없이 단정하고 직관적인 텍스트 라벨 적용
+                        
                         const badgeHtml = hasNewSuggestion 
                             ? `<span style="background-color:#ff4d4d; color:white; font-size:0.75rem; padding:3px 8px; border-radius:10px; margin-left:8px; font-weight:bold; vertical-align:middle;">새 제안 🔴</span>` 
                             : '';
@@ -153,7 +153,7 @@
                     tripBox.innerHTML = tripHtml;
                 }
 
-                // 👥 2. 내 친구 목록 출력 (최대 6명)
+                // 내 친구 목록 출력
                 if (friends.length === 0) {
                     friendBox.innerHTML = `<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#757575; font-size:0.95rem;">등록된 친구가 없습니다</div>`;
                 } else {

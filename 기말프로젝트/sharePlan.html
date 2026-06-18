@@ -10,7 +10,6 @@
     <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=52c189f6d3ae45119ab513a6d7a4fb85&libraries=services"></script>
 
     <style>
-        /* ★ 하단바가 화면 중간에 뜨는 버그를 잡기 위해 body 스타일 추가 */
         body {
             display: flex;
             flex-direction: column;
@@ -27,7 +26,6 @@
             margin: 0 auto;
         }
 
-        /* 여행 요약 정보 상단 바 */
         .detail-header {
             display: flex;
             align-items: center;
@@ -50,7 +48,7 @@
             font-weight: bold;
         }
 
-        /* 날짜, 장소, 동행인 우측 정렬 */
+
         .travel-meta {
             display: flex;
             gap: 25px;
@@ -63,7 +61,6 @@
             color: #333;
         }
 
-        /* 섹션 타이틀 묶음 (설명 글씨 포함) */
         .section-header {
             display: flex;
             align-items: baseline;
@@ -82,14 +79,14 @@
             color: #888;
         }
 
-        /* 큰 섹션 공통 바깥 여백 */
+     
         .section-group {
             margin-bottom: 35px;
         }
 
         /* --- 1. 일정 추가 박스 --- */
         .add-schedule-container {
-            background-color: #f5f5f5; /* 연회색 큰 상자 */
+            background-color: #f5f5f5; 
             border-radius: 12px;
             padding: 15px 20px;
             display: flex;
@@ -104,7 +101,6 @@
             font-size: 0.95rem;
             color: #333;
             cursor: pointer;
-            /* 장소 이름이 길어져도 버튼 모양이 깨지지 않게 방어 코드 추가 */
             max-width: 220px;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -131,7 +127,7 @@
             font-size: 1.8rem;
             font-weight: 300;
             cursor: pointer;
-            margin-left: auto; /* 플러스 버튼을 오른쪽 끝으로 밀기 */
+            margin-left: auto; 
             padding-right: 10px;
         }
 
@@ -145,7 +141,6 @@
             gap: 12px;
         }
 
-        /* 제안된 일정 개별 행 */
         .suggested-item {
             background-color: #d9d9d9;
             border-radius: 20px;
@@ -154,7 +149,6 @@
             align-items: center;
         }
 
-        /* 내부 정보 그룹 (장소, 제안자 공통) */
         .info-group {
             display: flex;
             gap: 10px;
@@ -163,7 +157,7 @@
 
         .info-group .label {
             font-size: 0.9rem;
-            color: #757575; /* '장소', '제안자' 라벨은 흐리게 */
+            color: #757575; 
             min-width: 35px;
         }
 
@@ -173,7 +167,6 @@
             color: #000;
         }
 
-        /* 가로 비율 분할 배치 */
         .item-place {
             width: 45%;
         }
@@ -182,7 +175,6 @@
             width: 35%;
         }
 
-        /* 우측 액션 버튼 및 상태 텍스트 (오른쪽 정렬) */
         .item-actions {
             margin-left: auto; 
             display: flex;
@@ -208,12 +200,11 @@
             color: #757575;
         }
 
-        /* ★ [2단계] 지도 검색창 모달 팝업 레이아웃 스타일 추가 */
         .map-modal {
-            display: none; /* 평소에는 숨김 */
+            display: none; 
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); /* 반투명 어두운 배경 */
+            background: rgba(0,0,0,0.5); 
             z-index: 999;
             justify-content: center;
             align-items: center;
@@ -353,11 +344,9 @@
         const tripId = urlParams.get('id') || 'trip2';
         const day = urlParams.get('day') || '1';
 
-        // 👤 로그인한 유저의 고유 코드 분석 및 계정 통합형 일정 키 생성
         const loggedInUser = localStorage.getItem('loggedInUser');
         const userCode = loggedInUser ? JSON.parse(loggedInUser).code : 'guest';
 
-        // 두 유저가 같은 여행 ID와 일차를 공유하므로 userCode를 뺀 통합 키 사용!
         const suggestedKey = `suggested_${tripId}_${day}`; 
         const confirmedKey = `confirmed_${tripId}_${day}`; 
 
@@ -370,7 +359,7 @@
                 currentUser = JSON.parse(loggedInUser).name;
             }
 
-            // 여행 정보 동적 연동 (내 전용 방에서)
+            // 여행 정보 동적 연동 
             const tripsKey = `trips_${userCode}`;
             const trips = JSON.parse(localStorage.getItem(tripsKey)) || [];
             currentTrip = trips.find(t => t.id === tripId) || trips[1];
@@ -433,7 +422,6 @@
             });
         }
 
-        // 📜 제안된 일정 리스트를 화면에 그려주는 함수 (고유 코드 기반 판별 메커니즘 도입)
         function renderSuggestedList() {
             if (currentTrip && currentTrip.companion === "혼자") return;
             const listContainer = document.getElementById('suggested-list');
@@ -448,12 +436,10 @@
                 
                 let actionHtml = '';
                 
-                // ⭐ [버그 완전 박멸] 글자가 아닌 고유 유저 유니크 코드로 제안자 체크!
                 if (item.proposerCode === userCode) {
-                    // 내가 보낸 제안이 확실하므로 "수락 대기 중" 표시
+                    // 내가 보낸 제안 "수락 대기 중" 표시
                     actionHtml = `<span class="status-text">수락 대기 중</span>`;
                 } else {
-                    // 상대방이 보낸 제안이 확실하므로 "수락/삭제 버튼" 완벽 활성화!
                     actionHtml = `
                         <button class="action-btn" onclick="acceptItem(${index})">✓</button>
                         <button class="action-btn" onclick="rejectItem(${index})">✖</button>
@@ -469,9 +455,9 @@
             });
         }
 
-        // ➕ 일정 제안 추가 함수 (제안할 때 내 코드까지 묶어서 보관)
+        // ➕ 일정 제안 추가 함수 
         function addSuggestedSchedule() {
-            if (!selectedPlace) { alert('먼저 [지도에서 찾기] 버튼을 눌러 장소를 선택해줘!'); return; }
+            if (!selectedPlace) { alert('먼저 장소를 선택해 주세요'); return; }
             const finalPlaceName = selectedPlace.name;
             
             if (currentTrip && currentTrip.companion === "혼자") {
@@ -491,13 +477,13 @@
                 tripList.push({ 
                     name: finalPlaceName, 
                     proposer: currentUser, 
-                    proposerCode: userCode, // ✨ 제안 유저의 유니크 코드 전송
+                    proposerCode: userCode, 
                     status: 'pending', 
                     lat: selectedPlace.lat, 
                     lng: selectedPlace.lng 
                 });
                 localStorage.setItem(suggestedKey, JSON.stringify(tripList));
-                alert(`친구에게 '${finalPlaceName}' 일정을 제안했습니다!`);
+                alert(`친구에게 '${finalPlaceName}' 일정을 제안했습니다`);
             }
             selectedPlace = null;
             document.getElementById('search-btn').innerText = '지도에서 찾기';
